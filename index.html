@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Polapop - Retro Digicam & Secret Pinboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Caveat, Fredoka, Playwrite, Space Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Playwrite+US+Trad:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --camera-base: #f5eedb;
+      --camera-light: #fffef8;
+      --camera-shadow: #d8cdb4;
+      --camera-accent: #2c2520;
+      --lens-ring-base: #edd8cf;
+      --lens-ring-inner: #dec1b5;
+    }
+
+    body.theme-cream {
+      --camera-base: #f5eedb;
+      --camera-light: #fffef8;
+      --camera-shadow: #d8cdb4;
+      --camera-accent: #2c2520;
+      --lens-ring-base: #edd8cf;
+      --lens-ring-inner: #dec1b5;
+    }
+
+    body.theme-blue {
+      --camera-base: #a0d4f7;
+      --camera-light: #bde4fc;
+      --camera-shadow: #7ab8e3;
+      --camera-accent: #1e293b;
+      --lens-ring-base: #93cbee;
+      --lens-ring-inner: #7dbce3;
+    }
+
+    body.theme-pink {
+      --camera-base: #fbcfe8;
+      --camera-light: #fdf2f8;
+      --camera-shadow: #f472b6;
+      --camera-accent: #831843;
+      --lens-ring-base: #f9a8d4;
+      --lens-ring-inner: #ec4899;
+    }
+
+    body.theme-lavender {
+      --camera-base: #e9d5ff;
+      --camera-light: #faf5ff;
+      --camera-shadow: #c084fc;
+      --camera-accent: #581c87;
+      --lens-ring-base: #d8b4fe;
+      --lens-ring-inner: #a855f7;
+    }
+
+    body.theme-mint {
+      --camera-base: #bbf7d0;
+      --camera-light: #f0fdf4;
+      --camera-shadow: #86efac;
+      --camera-accent: #14532d;
+      --lens-ring-base: #a7f3d0;
+      --lens-ring-inner: #4ade80;
+    }
+
+    body.theme-butter {
+      --camera-base: #fef08a;
+      --camera-light: #fefce8;
+      --camera-shadow: #fde047;
+      --camera-accent: #713f12;
+      --lens-ring-base: #fef9c3;
+      --lens-ring-inner: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .editable-text {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    body {
+      background-color: #d1d5db;
+      background-image: radial-gradient(#adb5bd 1.6px, transparent 1.6px);
+      background-size: 16px 16px;
+      font-family: 'Fredoka', cursive, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      touch-action: pan-y;
+    }
+
+    .font-caveat { font-family: 'Caveat', cursive; }
+    .font-playwrite { font-family: 'Playwrite US Trad', cursive; }
+    .font-mono { font-family: 'Space Mono', monospace; }
+    .font-fredoka { font-family: 'Fredoka', sans-serif; }
+
+    .polaroid-theme-classic { background: #ffffff; color: #1e293b; }
+    .polaroid-theme-kiss { background: #faf7f5; color: #1e293b; }
+    .polaroid-theme-ribbon { background: #fff8f9; color: #831843; }
+    .polaroid-theme-crimson { background: #4a0d18; color: #ffe4e6; border: 1px solid #360810; }
+    .polaroid-theme-heart { background: #fdfdfd; color: #1e293b; }
+    .polaroid-theme-star { background: #f8fafc; color: #0f172a; }
+
+    .polaroid-theme-crimson .secret-box-outline {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: #fda4af;
+    }
+    .polaroid-theme-crimson .flip-back {
+      background: #380812 !important;
+      color: #fce7f3 !important;
+    }
+    .polaroid-theme-crimson .secret-text-input {
+      background: rgba(255, 255, 255, 0.12) !important;
+      color: #fff !important;
+      border-color: #fda4af !important;
+    }
+
+    /* Vector SVG Decorations */
+    .theme-deco-blossom {
+      position: absolute;
+      top: -18px;
+      left: -16px;
+      width: 62px;
+      height: 62px;
+      z-index: 25;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.22));
+    }
+
+    .theme-deco-ribbon-bar {
+      position: absolute;
+      bottom: 6px;
+      left: 0;
+      right: 0;
+      height: 24px;
+      background: linear-gradient(90deg, rgba(254, 215, 226, 0.95) 0%, rgba(251, 207, 232, 0.9) 30%, rgba(244, 114, 182, 0.85) 60%, rgba(251, 207, 232, 0.95) 100%);
+      box-shadow: 0 1px 3px rgba(190, 24, 93, 0.15);
+      border-top: 1px solid rgba(244, 114, 182, 0.6);
+      border-bottom: 1px solid rgba(244, 114, 182, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 48px;
+      pointer-events: none;
+      z-index: 18;
+    }
+
+    .theme-deco-satin-bow {
+      position: absolute;
+      bottom: -6px;
+      right: 2px;
+      width: 58px;
+      height: 52px;
+      pointer-events: none;
+      z-index: 26;
+      filter: drop-shadow(0 4px 6px rgba(190, 24, 93, 0.28));
+    }
+
+    .theme-deco-kiss {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      width: 44px;
+      height: 32px;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(0 2px 5px rgba(185, 28, 28, 0.35));
+    }
+
+    .theme-deco-tulips {
+      position: absolute;
+      bottom: 2px;
+      left: 4px;
+      width: 52px;
+      height: 72px;
+      pointer-events: none;
+      z-index: 22;
+      filter: drop-shadow(0 4px 7px rgba(0,0,0,0.38));
+    }
+
+    .theme-deco-heart {
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      pointer-events: none;
+      z-index: 14;
+      filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.3));
+    }
+
+    .theme-deco-star {
+      position: absolute;
+      bottom: 6px;
+      left: 8px;
+      width: 26px;
+      height: 26px;
+      pointer-events: none;
+      z-index: 14;
+      filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.35));
+    }
+
+    .camera-ground-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      filter: drop-shadow(0 32px 36px rgba(44, 38, 30, 0.28))
+              drop-shadow(0 14px 18px rgba(44, 38, 30, 0.18))
+              drop-shadow(0 4px 6px rgba(44, 38, 30, 0.12));
+    }
+
+    .camera-ground-shadow {
+      position: absolute;
+      bottom: -14px;
+      left: 5%;
+      width: 90%;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(35, 27, 20, 0.45) 0%, rgba(35, 27, 20, 0.2) 50%, transparent 75%);
+      filter: blur(7px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .instax-camera {
+      width: 326px;
+      height: 334px;
+      background: radial-gradient(circle at 38% 28%, var(--camera-light) 0%, var(--camera-base) 60%, var(--camera-shadow) 100%);
+      border-radius: 58px 46px 52px 52px;
+      box-shadow: 
+        inset 0 4px 10px rgba(255, 255, 255, 0.95),
+        inset 0 -8px 16px rgba(120, 100, 75, 0.22),
+        inset 2px 0 6px rgba(255, 255, 255, 0.6),
+        inset -2px 0 6px rgba(0, 0, 0, 0.08);
+      position: relative;
+      transition: background 0.35s ease;
+      z-index: 1;
+    }
+
+    .camera-parting-seam {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 74px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.2) 20%, rgba(0,0,0,0.2) 80%, rgba(0,0,0,0.12) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+
+    .strap-lug-mount {
+      position: absolute;
+      top: 110px;
+      width: 10px;
+      height: 28px;
+      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 40%, #64748b 70%, #94a3b8 100%);
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.25), inset 0 1px 2px #fff;
+      z-index: 0;
+    }
+    .strap-lug-mount.left { left: -6px; border-radius: 4px 0 0 4px; }
+    .strap-lug-mount.right { right: -6px; border-radius: 0 4px 4px 0; }
+
+    .strap-lug-core {
+      position: absolute;
+      top: 5px;
+      width: 6px;
+      height: 18px;
+      background: #0f172a;
+      border-radius: 2px;
+      box-shadow: inset 0 1px 2px #000;
+    }
+    .strap-lug-mount.left .strap-lug-core { left: 2px; }
+    .strap-lug-mount.right .strap-lug-core { right: 2px; }
+
+    .camera-grip-indent {
+      position: absolute;
+      left: 18px;
+      top: 155px;
+      width: 44px;
+      height: 110px;
+      border-radius: 22px;
+      background: linear-gradient(90deg, rgba(0,0,0,0.08) 0%, transparent 65%, rgba(255,255,255,0.45) 100%);
+      box-shadow: inset 2px 2px 5px rgba(0,0,0,0.08);
+      pointer-events: none;
+    }
+
+    .viewfinder-outer {
+      position: absolute;
+      top: 26px;
+      left: 28px;
+      width: 60px;
+      height: 60px;
+      background: #111827;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 3px 8px #000, 0 3px 6px rgba(0,0,0,0.18), inset 0 0 0 2px rgba(255, 255, 255, 0.15);
+    }
+
+    .viewfinder-lens {
+      width: 28px;
+      height: 28px;
+      background: #1f2937;
+      border-radius: 6px;
+      border: 1px solid #374151;
+      position: relative;
+      box-shadow: inset 0 0 8px #000;
+    }
+
+    .viewfinder-lens::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 0 6px #60a5fa;
+    }
+
+    /* Clear acrylic flash capsule */
+    .flash-capsule {
+      position: absolute;
+      top: 24px;
+      left: 104px;
+      width: 38px;
+      height: 68px;
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+      border-radius: 16px;
+      border: 2px solid #cbd5e1;
+      padding: 4px 6px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.15), 0 3px 8px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(255,255,255,0.8);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .flash-capsule:hover {
+      transform: scale(1.05);
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.15), 0 4px 12px rgba(245, 158, 11, 0.35), inset 0 0 0 1px rgba(255,255,255,0.9);
+    }
+
+    .flash-capsule.flash-disabled {
+      opacity: 0.65;
+      filter: grayscale(0.65);
+    }
+
+    .flash-led-indicator {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      z-index: 5;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .flash-led-indicator.off {
+      background: #94a3b8;
+      box-shadow: none;
+    }
+
+    .flash-burst-active {
+      animation: xenonBurst 0.16s ease-out forwards;
+    }
+
+    @keyframes xenonBurst {
+      0% { box-shadow: 0 0 0px #ffffff; filter: brightness(1); }
+      35% { box-shadow: 0 0 40px 22px rgba(255, 255, 255, 0.95), 0 0 85px 45px rgba(186, 230, 253, 0.85); filter: brightness(3.5); background: #ffffff; }
+      100% { box-shadow: inset 0 2px 5px rgba(0,0,0,0.15), 0 3px 8px rgba(0,0,0,0.12); filter: brightness(1); }
+    }
+
+    .flash-grid {
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(0deg, rgba(100, 116, 139, 0.45) 0px, rgba(100, 116, 139, 0.45) 2px, transparent 2px, transparent 5px);
+      border-radius: 10px;
+      border: 1px solid rgba(203, 213, 225, 0.9);
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    .sensor-dot-big {
+      position: absolute;
+      top: 36px;
+      right: 48px;
+      width: 44px;
+      height: 44px;
+      background: #111827;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.55);
+      box-shadow: inset 0 3px 8px #000, 0 4px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sensor-dot-big::after {
+      content: '';
+      width: 18px;
+      height: 18px;
+      background: radial-gradient(circle, #38bdf8 0%, #0369a1 60%, #0f172a 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 4px rgba(56, 189, 248, 0.6);
+    }
+
+    .sensor-dot-mid {
+      position: absolute;
+      top: 60px;
+      right: 108px;
+      width: 14px;
+      height: 14px;
+      background: #0f172a;
+      border-radius: 50%;
+      box-shadow: inset 0 2px 3px #000, 0 1px 2px rgba(255,255,255,0.4);
+    }
+
+    .sensor-dot-small {
+      position: absolute;
+      top: 74px;
+      right: 98px;
+      width: 8px;
+      height: 8px;
+      background: #0f172a;
+      border-radius: 50%;
+      box-shadow: inset 0 1px 2px #000;
+    }
+
+    .shutter-btn-housing {
+      position: absolute;
+      top: 154px;
+      left: 36px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 40%, #f7e6dc 0%, #deb8a7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(45, 35, 25, 0.28), 0 3px 6px rgba(45, 35, 25, 0.18), inset 0 2px 3px rgba(255, 255, 255, 0.8), inset 0 -3px 5px rgba(0, 0, 0, 0.12);
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.15s ease;
+      z-index: 5;
+    }
+
+    .shutter-btn-housing:hover { filter: brightness(1.08); }
+    .shutter-btn-housing:active {
+      transform: scale(0.93) translateY(2px);
+      box-shadow: 0 3px 6px rgba(45, 35, 25, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .shutter-btn-core {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fffbf8, #e0beaf);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.18), 0 2px 4px rgba(255,255,255,0.7);
+    }
+
+    .lens-barrel-outer {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      width: 226px;
+      height: 226px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 45% 42%, var(--lens-ring-base) 0%, var(--lens-ring-inner) 100%);
+      box-shadow: 0 22px 34px -6px rgba(35, 26, 18, 0.38), 0 10px 16px rgba(35, 26, 18, 0.22), inset 0 4px 8px rgba(255, 255, 255, 0.9), inset 0 -8px 16px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+    }
+
+    .lens-barrel-mid {
+      width: 184px;
+      height: 184px;
+      border-radius: 50%;
+      background: repeating-radial-gradient(circle at 50% 50%, #f8fafc 0px, #e2e8f0 2px, #94a3b8 4px, #475569 6px, #cbd5e1 8px, #f8fafc 10px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35), inset 0 3px 6px rgba(255, 255, 255, 0.8), inset 0 -6px 12px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 2px solid #64748b;
+    }
+
+    .lens-engraving {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .lens-aperture-core {
+      width: 108px;
+      height: 108px;
+      border-radius: 50%;
+      background: #05070d;
+      border: 4px solid #1e293b;
+      box-shadow: inset 0 0 20px #000, 0 4px 10px rgba(0, 0, 0, 0.65), inset 0 4px 8px rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .lens-aperture-core video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1);
+      filter: contrast(1.22) saturate(1.2) brightness(1.05);
+    }
+
+    .lens-glass-reflection {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.48) 0%, rgba(255,255,255,0.08) 38%, transparent 62%);
+      pointer-events: none;
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
+    }
+
+    .polaroid-card {
+      position: absolute;
+      width: 175px;
+      background: #ffffff;
+      padding: 10px 10px 16px 10px;
+      border-radius: 4px;
+      box-shadow: 0 14px 28px rgba(30, 41, 59, 0.2), 0 6px 10px rgba(30, 41, 59, 0.12);
+      cursor: grab;
+      touch-action: none;
+      perspective: 1000px;
+      transition: box-shadow 0.2s ease, transform 0.15s ease, outline 0.15s ease;
+    }
+
+    .polaroid-card:active {
+      cursor: grabbing;
+      box-shadow: 0 22px 35px rgba(30, 41, 59, 0.3), 0 10px 16px rgba(30, 41, 59, 0.18);
+    }
+
+    .polaroid-card.active-selected {
+      outline: 2.5px solid #ec4899;
+      outline-offset: 3px;
+    }
+
+    .polaroid-img-wrapper {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #0f172a;
+      overflow: hidden;
+      border-radius: 2px;
+      position: relative;
+    }
+
+    .polaroid-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .secret-box-outline {
+      border: 1.5px dashed #94a3b8;
+      border-radius: 4px;
+      background-color: #fafbfc;
+      transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .secret-box-outline:hover {
+      background-color: #f1f5f9;
+      border-color: #64748b;
+    }
+
+    .flip-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .polaroid-card.flipped .flip-inner {
+      transform: rotateY(180deg);
+    }
+
+    .pinboard-pill-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 3px 12px;
+      border-radius: 9999px;
+      box-shadow: 0 4px 10px rgba(220, 38, 38, 0.45), 0 1px 3px rgba(0, 0, 0, 0.2);
+      border: 1.5px solid #fecaca;
+      white-space: nowrap;
+      z-index: 30;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pinboard-pill-badge:hover {
+      background: #b91c1c;
+      transform: translateX(-50%) scale(1.06);
+    }
+
+    .pinboard-pill-badge.is-pinned {
+      background: #059669;
+      border-color: #a7f3d0;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.45);
+    }
+
+    .flip-back-prompt {
+      position: absolute;
+      top: 52%;
+      right: -210px;
+      transform: translateY(-50%) translateX(-8px) scale(0.92);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      z-index: 35;
+      cursor: pointer;
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
+                  transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.22s ease;
+      white-space: nowrap;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.18));
+    }
+
+    .polaroid-card:hover .flip-back-prompt,
+    .polaroid-card:focus-within .flip-back-prompt,
+    .polaroid-card.card-touched .flip-back-prompt {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(-50%) translateX(0) scale(1);
+    }
+
+    .polaroid-card.flipped .flip-back-prompt {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .circular-flip-disc {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(4px);
+      border: 1.5px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: transform 0.18s ease, background 0.15s ease, border-color 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .flip-back-prompt:hover .circular-flip-disc {
+      transform: scale(1.12) rotate(-35deg);
+      background: #fef3c7;
+      border-color: #d97706;
+    }
+
+    .doodle-loop-arrow {
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+    }
+
+    .doodle-flip-text {
+      font-family: 'Caveat', cursive;
+      font-weight: 700;
+      font-size: 14px;
+      color: #0f172a;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+    }
+
+    .flip-front, .flip-back {
+      width: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    .flip-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #ffffff;
+      border-radius: 2px;
+    }
+
+    .flash-screen {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: opacity 0.08s ease-out;
+    }
+
+    .flash-illuminator {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #ffffff 40%, #fef3c7 100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: opacity 0.12s ease-in;
+    }
+
+    .gallery-modal-backdrop {
+      backdrop-filter: blur(6px);
+      background: rgba(15, 23, 42, 0.65);
+    }
+  </style>
+</head>
+
+<body class="flex flex-col justify-between p-4 md:p-7 min-h-screen theme-cream">
+  <header class="w-full flex flex-wrap items-center justify-between gap-3 z-30">
+    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-pink-100 hover:bg-pink-200 text-pink-600 font-bold border-2 border-pink-400 rounded-full px-4 py-1.5 text-xs md:text-sm tracking-wide transition-all shadow-sm active:scale-95">
+      <span>★</span> FOLLOW ME FOR MORE FUN STUFF
+    </a>
+
+    <div class="flex items-center flex-wrap gap-2">
+      <!-- Active Theme Picker for Next Snaps -->
+      <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border-2 border-slate-900 rounded-full px-3 py-1 shadow">
+        <label for="themeSelect" class="text-[11px] font-bold text-slate-700 uppercase">Frame:</label>
+        <select id="themeSelect" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">
+          <option value="classic">Classic White</option>
+          <option value="kiss">💋 Lipstick Kiss</option>
+          <option value="ribbon">🌸 Ribbon & Flower</option>
+          <option value="crimson">🥀 Crimson Tulips</option>
+          <option value="heart">❤️️ Painted Heart</option>
+          <option value="star">⭐ Y2K Blue Star</option>
+        </select>
+      </div>
+
+      <!-- Active Font Picker -->
+      <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border-2 border-slate-900 rounded-full px-3 py-1 shadow">
+        <label for="fontSelect" class="text-[11px] font-bold text-slate-700 uppercase">Font:</label>
+        <select id="fontSelect" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">
+          <option value="font-caveat">Handwriting (Caveat)</option>
+          <option value="font-playwrite">Calligraphy (Playwrite)</option>
+          <option value="font-mono">Typewriter (Space Mono)</option>
+          <option value="font-fredoka">Clean Round (Fredoka)</option>
+        </select>
+      </div>
+
+      <!-- Active Font Color Picker -->
+      <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border-2 border-slate-900 rounded-full px-3 py-1 shadow">
+        <label for="fontColorSelect" class="text-[11px] font-bold text-slate-700 uppercase">Color:</label>
+        <span id="fontColorDot" class="w-3.5 h-3.5 rounded-full border border-slate-400 inline-block shadow-inner" style="background-color: #1e293b;"></span>
+        <select id="fontColorSelect" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">
+          <option value="#1e293b">Classic Ink</option>
+          <option value="#f472b6"> Pastel Pink</option>
+          <option value="#e11d48"> Cherry Rose</option>
+          <option value="#78350f"> Vintage Brown</option>
+          <option value="#16a34a"> Matcha Green</option>
+          <option value="#2563eb"> Retro Blue</option>
+          <option value="#9333ea"> Soft Lilac</option>
+          <option value="#ea580c"> Sunset Orange</option>
+          <option value="#ffffff"> Pure White</option>
+        </select>
+        <input type="color" id="customColorInput" value="#1e293b" class="w-4 h-4 p-0 border-0 rounded cursor-pointer ml-0.5" title="Pick custom color" />
+      </div>
+
+      <button id="addSecretCardBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border-2 border-amber-400 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95 flex items-center gap-1.5" title="Add a Secret Message Card to Desk">
+        <span>✉️</span> + SECRET NOTE
+      </button>
+
+      <!-- Flash Toggle Button -->
+      <button id="flashToggleBtn" class="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-900 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95 flex items-center gap-1.5" title="Toggle Flash Mode (Auto / On / Off)">
+        <span>⚡</span> FLASH: <span id="flashLabel" class="text-amber-500 font-extrabold">ON</span>
+      </button>
+
+      <!-- Camera Body Color Switcher -->
+      <div class="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm border-2 border-slate-900 rounded-full px-3 py-1 shadow">
+        <label for="cameraColorSelect" class="text-[11px] font-bold text-slate-700 uppercase">Camera:</label>
+        <select id="cameraColorSelect" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">
+          <option value="cream">🍦Vintage Cream</option>
+          <option value="blue">🫧Sky Blue</option>
+          <option value="pink">🌸Blossom Pink</option>
+          <option value="lavender">Soft Lavender</option>
+          <option value="mint">🍃Matcha Mint</option>
+          <option value="butter">🧈Butter Yellow</option>
+        </select>
+      </div>
+
+      <button id="downloadAllBtn" class="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-900 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95">
+        DOWNLOAD
+      </button>
+
+      <button id="resetBoardBtn" class="bg-white hover:bg-slate-100 text-rose-600 border-2 border-slate-900 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95">
+        RESET
+      </button>
+    </div>
+  </header>
+
+  <main class="relative flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 my-4 w-full max-w-7xl mx-auto min-h-[580px]">
+    
+    <!-- Camera Chassis Structure -->
+    <div class="flex flex-col items-center justify-center p-3 z-20">
+      <div class="camera-ground-wrapper">
+        <div class="camera-ground-shadow"></div>
+
+        <div class="instax-camera" id="cameraChassis">
+          <div class="strap-lug-mount left"><div class="strap-lug-core"></div></div>
+          <div class="strap-lug-mount right"><div class="strap-lug-core"></div></div>
+          <div class="camera-parting-seam"></div>
+          <div class="camera-grip-indent"></div>
+
+          <div class="viewfinder-outer" title="Optical Viewfinder">
+            <div class="viewfinder-lens"></div>
+          </div>
+
+          <div class="flash-capsule" id="flashCapsule" role="button" tabindex="0" title="Xenon Flash (Click to toggle ON / OFF)">
+            <div class="flash-led-indicator" id="flashLed" title="Flash Ready"></div>
+            <div class="flash-grid"></div>
+          </div>
+
+          <div class="absolute top-6 right-24 text-right pointer-events-none">
+            <div class="font-extrabold text-slate-800 text-sm tracking-tight leading-none">polapop</div>
+            <div class="font-bold text-slate-700 text-xs tracking-wide leading-none mt-0.5">mini SE</div>
+          </div>
+
+          <div class="sensor-dot-big" title="Optical Lens Window"></div>
+          <div class="sensor-dot-mid" title="Light Sensor"></div>
+          <div class="sensor-dot-small"></div>
+
+          <div class="shutter-btn-housing" id="shutterBtn" role="button" aria-label="Take snap photo" title="Click to Take Photo!">
+            <div class="shutter-btn-core"></div>
+          </div>
+
+          <div class="lens-barrel-outer">
+            <div class="lens-barrel-mid">
+              <svg class="lens-engraving" viewBox="0 0 200 200">
+                <path id="curveTop" d="M 30,100 A 70,70 0 0,1 170,100" fill="transparent"></path>
+                <path id="curveBottom" d="M 170,100 A 70,70 0 0,1 30,100" fill="transparent"></path>
+                <text fill="#cbd5e1" font-size="8.5" font-weight="700" letter-spacing="1.2">
+                  <textPath href="#curveTop" startOffset="50%" text-anchor="middle">
+                    POLAPOP LENS 60mm
+                  </textPath>
+                </text>
+                <text fill="#94a3b8" font-size="7.5" font-weight="700" letter-spacing="0.8">
+                  <textPath href="#curveBottom" startOffset="50%" text-anchor="middle">
+                    FOCUS RANGE 0.6m - ∞
+                  </textPath>
+                </text>
+              </svg>
+
+              <div class="lens-aperture-core">
+                <video id="webcam" autoplay playsinline muted></video>
+                <div class="lens-glass-reflection"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <span class="inline-block bg-white/80 backdrop-blur-sm text-slate-700 text-[11px] font-bold px-3 py-1 rounded-full border border-slate-300 shadow-sm">
+          📸 Press shutter button on camera to snap & print
+        </span>
+      </div>
+    </div>
+
+    <!-- Draggable Pinboard Desk -->
+    <div id="pinboardContainer" class="relative flex-1 w-full h-[520px] rounded-3xl border-2 border-dashed border-slate-400/60 bg-slate-200/50 backdrop-blur-[2px] overflow-hidden">
+      <div id="emptyBoardMsg" class="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-500 font-caveat text-2xl pointer-events-none">
+        <span>No polaroids on your desk yet!</span>
+        <span class="text-sm font-sans text-slate-400 mt-1">Snap a photo with the camera or click "+ SECRET NOTE".</span>
+      </div>
+    </div>
+  </main>
+
+  <footer class="w-full flex flex-col sm:flex-row items-center justify-between gap-3 z-30 pt-2">
+    <button id="openGalleryBtn" class="flex items-center gap-2 bg-[#b89e83] hover:bg-[#a68c72] text-[#3e2c1e] font-bold px-4 py-2 rounded-xl text-xs md:text-sm tracking-wide shadow-md border border-[#9b8166] transition active:scale-95">
+      <span>📌</span> VIEW PUBLIC PINBOARD GALLERY (<span id="archiveCount">0</span>)
+    </button>
+
+    <div class="font-caveat text-slate-600 font-bold text-base md:text-lg tracking-wider text-center sm:text-right">
+      USE ONCE TO CAPTURE YOUR DAY THROUGH EVERYONE'S EYES →
+    </div>
+  </footer>
+
+  <!-- Overlays and Hidden Canvas -->
+  <div id="flashIlluminator" class="flash-illuminator"></div>
+  <div id="flashScreen" class="flash-screen"></div>
+  <canvas id="hiddenCanvas" style="display: none;" width="720" height="720"></canvas>
+
+  <!-- Digital Library Modal -->
+  <div id="galleryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 gallery-modal-backdrop">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 max-h-[85vh] flex flex-col shadow-2xl border-2 border-slate-800">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800">Polaroid Digital Library</h2>
+          <p class="text-xs text-slate-500">Edit, download, export to Instagram Story, or remove cards permanently.</p>
+        </div>
+        <button id="closeGalleryBtn" class="text-slate-500 hover:text-slate-800 font-black text-2xl px-2">✕</button>
+      </div>
+
+      <div id="modalGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto py-5 pr-2 flex-1"></div>
+
+      <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500">
+        <span>Click any card to export as high-res Polaroid PNG</span>
+        <button id="closeModalBottomBtn" class="bg-slate-900 text-white font-bold px-4 py-2 rounded-xl hover:bg-slate-800">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg transition-opacity duration-300 pointer-events-none z-50 opacity-0"></div>
+
+  <script>
+    const STORAGE_KEY = 'instax_polaroid_library_v6';
+    const THEME_KEY = 'instax_camera_theme_v6';
+
+    let polaroids = [];
+    let currentTheme = localStorage.getItem(THEME_KEY) || 'cream';
+    let activeCardTheme = 'ribbon';
+    let activeFontClass = 'font-caveat';
+    let activeFontColor = '#f472b6';
+    let activeCardId = null;
+    let highestZ = 10;
+    let audioCtx = null;
+    let flashMode = 'on';
+    const EMBEDDED_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBcNNAy6BJakLzyw9Yi5_lDUkocMZRV1nc",
+  authDomain: "polapop-54ef6.firebaseapp.com",
+  projectId: "polapop-54ef6",
+  storageBucket: "polapop-54ef6.firebasestorage.app",
+  messagingSenderId: "266598108482",
+  appId: "1:266598108482:web:d1d9db839c8d31dadd8cdb"
+};
+
+    const themeSelect = document.getElementById('themeSelect');
+    const fontSelect = document.getElementById('fontSelect');
+    const fontColorSelect = document.getElementById('fontColorSelect');
+    const customColorInput = document.getElementById('customColorInput');
+    const fontColorDot = document.getElementById('fontColorDot');
+    const cameraColorSelect = document.getElementById('cameraColorSelect');
+    const video = document.getElementById('webcam');
+    const shutterBtn = document.getElementById('shutterBtn');
+    const flashScreen = document.getElementById('flashScreen');
+    const flashIlluminator = document.getElementById('flashIlluminator');
+    const flashCapsule = document.getElementById('flashCapsule');
+    const flashLed = document.getElementById('flashLed');
+    const flashToggleBtn = document.getElementById('flashToggleBtn');
+    const flashLabel = document.getElementById('flashLabel');
+    const hiddenCanvas = document.getElementById('hiddenCanvas');
+    const pinboardContainer = document.getElementById('pinboardContainer');
+    const emptyBoardMsg = document.getElementById('emptyBoardMsg');
+    const archiveCount = document.getElementById('archiveCount');
+    const downloadAllBtn = document.getElementById('downloadAllBtn');
+    const resetBoardBtn = document.getElementById('resetBoardBtn');
+    const openGalleryBtn = document.getElementById('openGalleryBtn');
+    const closeGalleryBtn = document.getElementById('closeGalleryBtn');
+    const closeModalBottomBtn = document.getElementById('closeModalBottomBtn');
+    const galleryModal = document.getElementById('galleryModal');
+    const modalGrid = document.getElementById('modalGrid');
+    const addSecretCardBtn = document.getElementById('addSecretCardBtn');
+    const toast = document.getElementById('toast');
+
+    // Vector SVG Decorations
+    const THEME_DECORATIONS = {
+      kiss: `
+        <a href="https://www.flaticon.com/free-icons/kiss" title="kiss icons">Kiss icon</a>
+      `,
+      ribbon: `
+        <svg class="theme-deco-blossom" viewBox="0 0 140 140">
+          <defs>
+            <radialGradient id="petalRealGrad" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#fff5f8"/><stop offset="35%" stop-color="#fbcfe8"/><stop offset="70%" stop-color="#f472b6"/><stop offset="92%" stop-color="#db2777"/><stop offset="100%" stop-color="#be185d"/>
+            </radialGradient>
+            <radialGradient id="stamenGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fbbf24"/><stop offset="55%" stop-color="#d97706"/><stop offset="85%" stop-color="#78350f"/><stop offset="100%" stop-color="#451a03"/>
+            </radialGradient>
+          </defs>
+          <g transform="translate(70,70)">
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(45)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(90)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(135)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(180)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(225)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(270)" opacity="0.95"/>
+            <path d="M 0,-6 Q -18,-24 -16,-52 C -15,-66 15,-66 16,-52 Q 18,-24 0,-6 Z" fill="url(#petalRealGrad)" transform="rotate(315)" opacity="0.95"/>
+            <circle cx="0" cy="0" r="14" fill="url(#stamenGrad)"/>
+            <circle cx="0" cy="0" r="11" fill="none" stroke="#fef08a" stroke-dasharray="2,3" stroke-width="2.5"/>
+            <circle cx="0" cy="0" r="6" fill="#f59e0b"/>
+            <circle cx="0" cy="0" r="2.5" fill="#451a03"/>
+          </g>
+        </svg>
+        <div class="theme-deco-ribbon-bar">
+          <span style="font-size:11px; font-weight:700; color:#831843; font-family:'Playwrite US Trad', cursive; letter-spacing:0.5px;">With love</span>
+        </div>
+        <svg class="theme-deco-satin-bow" viewBox="0 0 160 140" fill="none">
+          <defs>
+            <linearGradient id="bowGradLeft" x1="0%" y1="0%" x2="100%" y2="80%">
+              <stop offset="0%" stop-color="#ffe4e6"/><stop offset="70%" stop-color="#f472b6"/><stop offset="100%" stop-color="#db2777"/>
+            </linearGradient>
+            <linearGradient id="bowGradRight" x1="100%" y1="0%" x2="0%" y2="80%">
+              <stop offset="0%" stop-color="#ffe4e6"/><stop offset="70%" stop-color="#f472b6"/><stop offset="100%" stop-color="#db2777"/>
+            </linearGradient>
+            <linearGradient id="knotGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fdf2f8"/><stop offset="60%" stop-color="#f472b6"/><stop offset="100%" stop-color="#be185d"/>
+            </linearGradient>
+          </defs>
+          <path d="M 72,50 C 70,75 58,110 52,130 C 58,126 68,122 74,124 C 80,105 84,75 80,50 Z" fill="url(#bowGradLeft)"/>
+          <path d="M 88,50 C 90,75 102,110 108,130 C 102,126 92,122 86,124 C 80,105 76,75 80,50 Z" fill="url(#bowGradRight)"/>
+          <path d="M 74,40 C 45,15 10,20 12,48 C 14,68 45,70 72,48 Z" fill="url(#bowGradLeft)"/>
+          <path d="M 86,40 C 115,15 150,20 148,48 C 146,68 115,70 88,48 Z" fill="url(#bowGradRight)"/>
+          <rect x="68" y="32" width="24" height="26" rx="9" fill="url(#knotGrad)"/>
+        </svg>
+      `,
+      crimson: `
+        <svg class="theme-deco-tulips" viewBox="0 0 100 130">
+          <defs>
+            <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#86efac"/><stop offset="100%" stop-color="#14532d"/>
+            </linearGradient>
+            <radialGradient id="tulipPetalSoft" cx="45%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#ffffff"/><stop offset="50%" stop-color="#ffe4e6"/><stop offset="100%" stop-color="#db2777"/>
+            </radialGradient>
+          </defs>
+          <path d="M 45,125 Q 46,95 48,58" stroke="url(#stemGrad)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+          <path d="M 45,125 Q 36,92 28,68" stroke="url(#stemGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M 45,125 Q 56,92 68,66" stroke="url(#stemGrad)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <g transform="translate(28, 55)"><ellipse cx="0" cy="2" rx="7" ry="16" fill="url(#tulipPetalSoft)"/></g>
+          <g transform="translate(68, 52)"><ellipse cx="0" cy="2" rx="7" ry="16" fill="url(#tulipPetalSoft)"/></g>
+          <g transform="translate(48, 42)"><ellipse cx="0" cy="2" rx="8" ry="19" fill="#ffffff"/></g>
+        </svg>
+      `,
+      heart: `
+        <svg class="theme-deco-heart" viewBox="0 0 40 40">
+          <path d="M20,34 C18,32 6,24 6,14 C6,8 10,4 16,4 C19,4 20,7 20,7 C20,7 21,4 24,4 C30,4 34,8 34,14 C34,24 22,32 20,34 Z" fill="#e11d48" stroke="#9f1239" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      `,
+      star: `
+        <svg class="theme-deco-star" viewBox="0 0 40 40">
+          <polygon points="20,2 25,14 38,15 28,24 31,37 20,30 9,37 12,24 2,15 15,14" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.8" stroke-linejoin="round"/>
+        </svg>
+      `,
+      classic: ``
+    };
+
+    function getFormattedDate(d = new Date()) {
+      const yr = d.getFullYear();
+      const mo = String(d.getMonth() + 1).padStart(2, '0');
+      const da = String(d.getDate()).padStart(2, '0');
+      return `${yr}/${mo}/${da}`;
+    }
+
+    const DEFAULT_PHOTOS = [
+      {
+        id: 'secret-card-init',
+        type: 'secret-card',
+        theme: 'ribbon',
+        font: 'font-caveat',
+        fontColor: '#831843',
+        caption: 'SECRET MESSAGE',
+        secretNote: 'meet me after sunset behind the cinema 🍿✨',
+        date: getFormattedDate(),
+        x: 35,
+        y: 40,
+        rot: -6,
+        isFlipped: false
+      },
+      {
+        id: 'cat-sample-1',
+        type: 'photo',
+        theme: 'kiss',
+        font: 'font-caveat',
+        fontColor: '#f472b6',
+        url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop&q=80',
+        caption: 'MAY I MEET YOU',
+        secretNote: 'Always wearing our shades indoors 😎',
+        date: getFormattedDate(),
+        x: 215,
+        y: 50,
+        rot: 3,
+        isFlipped: false
+      },
+      {
+        id: 'cat-sample-2',
+        type: 'photo',
+        theme: 'crimson',
+        font: 'font-playwrite',
+        fontColor: '#ffe4e6',
+        url: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=500&auto=format&fit=crop&q=80',
+        caption: 'With Love',
+        secretNote: 'Popcorn and retro cinema nights 🎬',
+        date: getFormattedDate(),
+        x: 390,
+        y: 65,
+        rot: 7,
+        isFlipped: false
+      }
+    ];
+
+    themeSelect.value = activeCardTheme;
+    themeSelect.addEventListener('change', (e) => {
+      activeCardTheme = e.target.value;
+      if (activeCardId) {
+        const cardObj = polaroids.find(p => p.id === activeCardId);
+        if (cardObj) {
+          cardObj.theme = activeCardTheme;
+          saveData();
+          renderBoard();
+        }
+      }
+      showToast(`Frame: ${e.target.options[e.target.selectedIndex].text}`);
+    });
+
+    fontSelect.value = activeFontClass;
+    fontSelect.addEventListener('change', (e) => {
+      activeFontClass = e.target.value;
+      if (activeCardId) {
+        const cardObj = polaroids.find(p => p.id === activeCardId);
+        if (cardObj) {
+          cardObj.font = activeFontClass;
+          saveData();
+          renderBoard();
+        }
+      }
+      showToast(`Font: ${e.target.options[e.target.selectedIndex].text}`);
+    });
+
+    function applyActiveColor(colorHex) {
+      activeFontColor = colorHex;
+      fontColorDot.style.backgroundColor = activeFontColor;
+      customColorInput.value = activeFontColor;
+      if (activeCardId) {
+        const cardObj = polaroids.find(p => p.id === activeCardId);
+        if (cardObj) {
+          cardObj.fontColor = activeFontColor;
+          const activeDom = document.getElementById(`card-${activeCardId}`);
+          if (activeDom) {
+            const cap = activeDom.querySelector('.caption-text');
+            const dt = activeDom.querySelector('.date-text');
+            if (cap) cap.style.color = activeFontColor;
+            if (dt) dt.style.color = activeFontColor;
+          }
+          saveData();
+        }
+      }
+    }
+
+    fontColorSelect.value = activeFontColor;
+    fontColorDot.style.backgroundColor = activeFontColor;
+    fontColorSelect.addEventListener('change', (e) => {
+      applyActiveColor(e.target.value);
+      showToast(`Text color changed!`);
+    });
+
+    customColorInput.addEventListener('input', (e) => {
+      applyActiveColor(e.target.value);
+    });
+
+    cameraColorSelect.value = currentTheme;
+    cameraColorSelect.addEventListener('change', (e) => {
+      applyTheme(e.target.value);
+    });
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      localStorage.setItem(THEME_KEY, theme);
+      document.body.className = `flex flex-col justify-between p-4 md:p-7 min-h-screen theme-${theme}`;
+      cameraColorSelect.value = theme;
+      showToast(`Camera theme: ${theme.toUpperCase()}`);
+    }
+
+    function updateFlashUI() {
+      if (flashMode === 'on') {
+        flashLabel.textContent = 'ON';
+        flashLabel.className = 'text-amber-500 font-extrabold';
+        flashCapsule.classList.remove('flash-disabled');
+        flashLed.classList.remove('off');
+      } else {
+        flashLabel.textContent = 'OFF';
+        flashLabel.className = 'text-slate-400 font-extrabold';
+        flashCapsule.classList.add('flash-disabled');
+        flashLed.classList.add('off');
+      }
+    }
+
+    function toggleFlash() {
+      flashMode = flashMode === 'on' ? 'off' : 'on';
+      updateFlashUI();
+      showToast(`Flash: ${flashMode.toUpperCase()}`);
+    }
+
+    flashToggleBtn.addEventListener('click', toggleFlash);
+    flashCapsule.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFlash();
+    });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2200);
+    }
+
+    function playMechanicalShutterSound(isFlashFired = true) {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const now = audioCtx.currentTime;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(380, now);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.04);
+        gain.gain.setValueAtTime(0.8, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+
+        if (isFlashFired) {
+          const flashPop = audioCtx.createOscillator();
+          const flashGain = audioCtx.createGain();
+          flashPop.type = 'sine';
+          flashPop.frequency.setValueAtTime(2600, now);
+          flashPop.frequency.exponentialRampToValueAtTime(320, now + 0.06);
+          flashGain.gain.setValueAtTime(0.45, now);
+          flashGain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          flashPop.connect(flashGain);
+          flashGain.connect(audioCtx.destination);
+          flashPop.start(now);
+          flashPop.stop(now + 0.08);
+        }
+      } catch (err) {}
+    }
+
+    let videoTrack = null;
+    async function initWebcam() {
+      try {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 720 }, height: { ideal: 720 }, facingMode: 'user' },
+            audio: false
+          });
+          video.srcObject = stream;
+          videoTrack = stream.getVideoTracks()[0] || null;
+        }
+      } catch (err) {
+        showToast('Camera active in demo preview mode');
+      }
+    }
+
+    async function setHardwareTorch(enabled) {
+      if (!videoTrack) return;
+      try {
+        const capabilities = videoTrack.getCapabilities ? videoTrack.getCapabilities() : {};
+        if (capabilities.torch) {
+          await videoTrack.applyConstraints({ advanced: [{ torch: enabled }] });
+        }
+      } catch (err) {}
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          polaroids = JSON.parse(raw);
+        } else {
+          polaroids = [...DEFAULT_PHOTOS];
+          saveData();
+        }
+      } catch (e) {
+        polaroids = [...DEFAULT_PHOTOS];
+      }
+      renderBoard();
+      updateCounter();
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(polaroids));
+      } catch (e) {}
+      updateCounter();
+    }
+
+    function updateCounter() {
+      archiveCount.textContent = polaroids.length;
+      if (polaroids.length === 0) {
+        emptyBoardMsg.classList.remove('hidden');
+      } else {
+        emptyBoardMsg.classList.add('hidden');
+      }
+    }
+
+    function generatePolaroidCanvas(item, callback) {
+      const exportCanvas = document.createElement('canvas');
+      const W = 600;
+      const H = 730;
+      exportCanvas.width = W;
+      exportCanvas.height = H;
+      const ctx = exportCanvas.getContext('2d');
+      const theme = item.theme || 'classic';
+
+      ctx.fillStyle = theme === 'crimson' ? '#4a0d18' : (theme === 'ribbon' ? '#fff8f9' : (theme === 'kiss' ? '#faf7f5' : '#ffffff'));
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = theme === 'crimson' ? '#781528' : '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, W - 2, H - 2);
+
+      const photoX = 35;
+      const photoY = 35;
+      const photoSize = 530;
+
+      let chosenFont = 'bold 36px "Caveat", cursive';
+      if (item.font === 'font-playwrite') chosenFont = '28px "Playwrite US Trad", cursive';
+      else if (item.font === 'font-mono') chosenFont = 'bold 24px "Space Mono", monospace';
+      else if (item.font === 'font-fredoka') chosenFont = 'bold 28px "Fredoka", sans-serif';
+
+      function drawDecorations() {
+        if (theme === 'kiss') {
+          ctx.save();
+          const kx = W - 90, ky = H - 65;
+          ctx.fillStyle = '#dc2626';
+          ctx.beginPath();
+          ctx.ellipse(kx, ky, 28, 12, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (theme === 'heart') {
+          ctx.fillStyle = '#e11d48';
+          ctx.font = '36px sans-serif';
+          ctx.fillText('❤️', W - 75, H - 45);
+        } else if (theme === 'star') {
+          ctx.fillStyle = '#2563eb';
+          ctx.font = '36px sans-serif';
+          ctx.fillText('⭐', 50, H - 45);
+        }
+      }
+
+      if (item.type === 'secret-card') {
+        ctx.strokeStyle = theme === 'crimson' ? '#fda4af' : '#94a3b8';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([8, 6]);
+        ctx.strokeRect(photoX + 20, photoY + 30, photoSize - 40, photoSize - 60);
+        ctx.setLineDash([]);
+        ctx.fillStyle = item.fontColor || '#1e293b';
+        ctx.font = chosenFont;
+        ctx.textAlign = 'center';
+        ctx.fillText(item.caption || 'SECRET MESSAGE', W / 2, 220);
+        ctx.fillStyle = theme === 'crimson' ? '#fbcfe8' : '#475569';
+        ctx.font = '26px "Caveat", cursive';
+        ctx.fillText(item.secretNote || '(No secret message written)', W / 2, 320);
+        ctx.fillStyle = item.fontColor || '#64748b';
+        ctx.font = '22px "Space Mono", monospace';
+        ctx.fillText(item.date || getFormattedDate(), W / 2, 665);
+        drawDecorations();
+        callback(exportCanvas.toDataURL('image/png'));
+      } else {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          ctx.drawImage(img, photoX, photoY, photoSize, photoSize);
+          ctx.fillStyle = item.fontColor || '#1e293b';
+          ctx.font = chosenFont;
+          ctx.textAlign = 'center';
+          ctx.fillText(item.caption || 'MAY I MEET YOU', W / 2, 620);
+          ctx.fillStyle = item.fontColor || '#64748b';
+          ctx.font = '20px "Space Mono", monospace';
+          ctx.fillText(item.date || getFormattedDate(), W / 2, 665);
+          drawDecorations();
+          callback(exportCanvas.toDataURL('image/png'));
+        };
+        img.onerror = () => {
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(photoX, photoY, photoSize, photoSize);
+          drawDecorations();
+          callback(exportCanvas.toDataURL('image/png'));
+        };
+        img.src = item.url;
+      }
+    }
+
+    function generateInstagramStoryCanvas(item, callback) {
+      generatePolaroidCanvas(item, (polaroidPngUrl) => {
+        const storyCanvas = document.createElement('canvas');
+        const SW = 1080, SH = 1920;
+        storyCanvas.width = SW;
+        storyCanvas.height = SH;
+        const sCtx = storyCanvas.getContext('2d');
+        const theme = item.theme || 'classic';
+
+        const grad = sCtx.createLinearGradient(0, 0, SW, SH);
+        if (theme === 'crimson') {
+          grad.addColorStop(0, '#2d060c');
+          grad.addColorStop(0.5, '#4a0d18');
+          grad.addColorStop(1, '#1f0307');
+        } else {
+          grad.addColorStop(0, '#fff1f2');
+          grad.addColorStop(0.5, '#fce7f3');
+          grad.addColorStop(1, '#fbcfe8');
+        }
+        sCtx.fillStyle = grad;
+        sCtx.fillRect(0, 0, SW, SH);
+
+        sCtx.fillStyle = theme === 'crimson' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(100, 116, 139, 0.12)';
+        for (let x = 18; x < SW; x += 36) {
+          for (let y = 18; y < SH; y += 36) {
+            sCtx.beginPath();
+            sCtx.arc(x, y, 1.8, 0, Math.PI * 2);
+            sCtx.fill();
+          }
+        }
+
+        sCtx.fillStyle = theme === 'crimson' ? '#ffe4e6' : '#1e293b';
+        sCtx.font = 'bold 36px "Fredoka", sans-serif';
+        sCtx.textAlign = 'center';
+        sCtx.fillText('★ MY INSTAX MEMORY ★', SW / 2, 200);
+
+        const polImg = new Image();
+        polImg.onload = () => {
+          sCtx.save();
+          sCtx.translate(SW / 2, SH / 2 + 10);
+          sCtx.rotate(-0.035);
+          sCtx.shadowColor = 'rgba(15, 23, 42, 0.28)';
+          sCtx.shadowBlur = 48;
+          sCtx.shadowOffsetY = 24;
+
+          const pW = 760;
+          const pH = (730 / 600) * pW;
+          sCtx.drawImage(polImg, -pW / 2, -pH / 2, pW, pH);
+
+          sCtx.shadowColor = 'transparent';
+          sCtx.fillStyle = 'rgba(244, 114, 182, 0.45)';
+          sCtx.fillRect(-110, -pH / 2 - 22, 220, 44);
+          sCtx.restore();
+
+          sCtx.fillStyle = theme === 'crimson' ? '#fecdd3' : '#475569';
+          sCtx.font = 'bold 36px "Caveat", cursive';
+          sCtx.textAlign = 'center';
+          sCtx.fillText("USE ONCE TO CAPTURE YOUR DAY THROUGH EVERYONE'S EYES →", SW / 2, SH - 140);
+
+          callback(storyCanvas.toDataURL('image/png'));
+        };
+        polImg.src = polaroidPngUrl;
+      });
+    }
+
+    async function exportToInstagramStory(item) {
+      showToast('Generating 9:16 Instagram Story image...');
+      generateInstagramStoryCanvas(item, async (storyPngUrl) => {
+        try {
+          const blob = await (await fetch(storyPngUrl)).blob();
+          const file = new File([blob], `instax-story-${Date.now().toString().slice(-4)}.png`, { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: 'Instax Story', text: 'Captured on Instax Mini SE Digicam ★' });
+            showToast('Shared to Instagram Story!');
+            return;
+          }
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+        }
+
+        const a = document.createElement('a');
+        a.href = storyPngUrl;
+        a.download = `story-${(item.caption || 'snap').toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-4)}.png`;
+        a.click();
+        showToast('📱 9:16 Story PNG saved! Ready to post.');
+      });
+    }
+
+    function downloadSinglePolaroid(id) {
+      const item = polaroids.find(p => p.id === id);
+      if (!item) return;
+      generatePolaroidCanvas(item, (pngUrl) => {
+        const a = document.createElement('a');
+        a.href = pngUrl;
+        a.download = `polaroid-${(item.caption || 'snap').toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-4)}.png`;
+        a.click();
+        showToast('Polaroid card downloaded!');
+      });
+    }
+
+    function deletePolaroid(id) {
+      polaroids = polaroids.filter(p => p.id !== id);
+      if (activeCardId === id) activeCardId = null;
+      saveData();
+      renderBoard();
+      renderGalleryModal();
+      showToast('Card removed from desk');
+    }
+
+    function renderBoard() {
+      const existingCards = pinboardContainer.querySelectorAll('.polaroid-card');
+      existingCards.forEach(c => c.remove());
+
+      const boardRect = pinboardContainer.getBoundingClientRect();
+      const maxX = Math.max(20, (boardRect.width || 600) - 200);
+      const maxY = Math.max(20, (boardRect.height || 500) - 240);
+
+      polaroids.forEach((item, index) => {
+        const posX = Math.min(Math.max(10, item.x !== undefined ? item.x : (25 + index * 40)), maxX);
+        const posY = Math.min(Math.max(10, item.y !== undefined ? item.y : (30 + index * 30)), maxY);
+        const rot = item.rot !== undefined ? item.rot : (index % 2 === 0 ? -4 : 6);
+        const cardTheme = item.theme || 'classic';
+        const cardFont = item.font || 'font-caveat';
+        const cardTextColor = item.fontColor || '#1e293b';
+        const decoHtml = THEME_DECORATIONS[cardTheme] || '';
+
+        const card = document.createElement('div');
+        card.className = `polaroid-card polaroid-theme-${cardTheme} ${item.isFlipped ? 'flipped' : ''} ${item.id === activeCardId ? 'active-selected' : ''}`;
+        card.id = `card-${item.id}`;
+        card.style.left = `${posX}px`;
+        card.style.top = `${posY}px`;
+        card.style.transform = `rotate(${rot}deg)`;
+        card.style.zIndex = index + 1;
+
+        const isPinned = item.isPublicPinned ? 'is-pinned' : '';
+        const pinBadgeText = item.isPublicPinned ? '📌 ON PUBLIC PINBOARD' : 'ADD TO PUBLIC PINBOARD';
+
+        if (item.type === 'secret-card') {
+          card.innerHTML = `
+            ${decoHtml}
+            <button class="pinboard-pill-badge ${isPinned}" title="Pin to Public Pinboard">
+              ${pinBadgeText}
+            </button>
+            <div class="flip-back-prompt flip-card-btn" title="Click to flip to back message">
+              <div class="circular-flip-disc">
+                <svg class="w-3.5 h-3.5 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+              </div>
+              <svg class="doodle-loop-arrow" viewBox="0 0 46 24" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M 3,12 C 9,20 18,22 22,14 C 25,7 20,3 15,6 C 10,10 14,18 30,15 L 40,14" />
+                <path d="M 34,10 L 41,14 L 35,18" />
+              </svg>
+              <span class="doodle-flip-text">FLIP BACK TO WRITE YOUR MESSAGE</span>
+            </div>
+            <div class="flip-inner h-full">
+              <div class="flip-front flex flex-col justify-between h-full">
+                <div class="flex items-center justify-between pb-1 text-slate-400">
+                  <span class="drag-handle text-[10px] tracking-wider text-slate-400 uppercase font-sans font-bold cursor-grab">⋮⋮ DRAG</span>
+                  <div class="flex items-center gap-1">
+                    <button class="cycle-theme-btn text-pink-600 hover:text-pink-800 p-0.5 rounded transition" title="Change Theme Frame">🎨</button>
+                    <button class="cycle-color-btn text-amber-600 hover:text-amber-800 p-0.5 rounded transition" title="Change Text Color">🖍️</button>
+                    <button class="story-card-btn text-rose-500 hover:text-rose-700 p-0.5 rounded transition" title="Export for Instagram Story (9:16)">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    </button>
+                    <button class="flip-card-btn text-amber-600 hover:text-amber-800 p-0.5 rounded transition" title="Flip to Read/Write Secret Message">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                    <button class="download-card-btn text-slate-500 hover:text-slate-900 p-0.5 rounded transition" title="Download Card">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </button>
+                    <button class="delete-card-btn text-rose-400 hover:text-rose-600 p-0.5 rounded transition" title="Delete">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="secret-box-outline w-full aspect-square flex flex-col items-center justify-center p-3 cursor-pointer group" title="Click or flip to reveal hidden note">
+                  <span class="caption-text ${cardFont} font-bold text-lg md:text-xl tracking-wider text-center group-hover:scale-105 transition-transform" style="color: ${cardTextColor};">
+                    ${item.caption}
+                  </span>
+                  <span class="text-[10px] text-amber-700 font-sans font-semibold mt-1 bg-amber-100/90 px-2 py-0.5 rounded-full">
+                    TAP TO FLIP 🔄
+                  </span>
+                </div>
+                <div class="mt-4">
+                  <div class="date-text font-mono text-[10px] text-center editable-text outline-none px-1 rounded hover:bg-slate-100/50 transition cursor-text" style="color: ${cardTextColor};" contenteditable="true" spellcheck="false" title="Click to edit date">
+                    ${item.date}
+                  </div>
+                </div>
+              </div>
+              <div class="flip-back p-1 text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span class="text-[10px] font-sans font-bold text-amber-700 uppercase">🔒 Secret Message</span>
+                  <button class="flip-card-btn text-slate-500 hover:text-slate-800 text-xs px-1 font-bold" title="Flip Back">✕ Back</button>
+                </div>
+                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto my-1 border border-amber-200" contenteditable="true" spellcheck="false" placeholder="Type your secret message here...">
+                  ${item.secretNote || 'Write something private here...'}
+                </div>
+                <div class="text-[9px] text-slate-400 text-center font-sans">Auto-saved to desk</div>
+              </div>
+            </div>
+          `;
+        } else {
+          card.innerHTML = `
+            ${decoHtml}
+            <button class="pinboard-pill-badge ${isPinned}" title="Pin to Public Pinboard">
+              ${pinBadgeText}
+            </button>
+            <div class="flip-back-prompt flip-card-btn" title="Click to flip to back message">
+              <div class="circular-flip-disc">
+                <svg class="w-3.5 h-3.5 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                  <path d="M3 3v5h5"/>
+                </svg>
+              </div>
+              <svg class="doodle-loop-arrow" viewBox="0 0 46 24" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M 3,12 C 9,20 18,22 22,14 C 25,7 20,3 15,6 C 10,10 14,18 30,15 L 40,14" />
+                <path d="M 34,10 L 41,14 L 35,18" />
+              </svg>
+              <span class="doodle-flip-text">FLIP BACK TO WRITE YOUR MESSAGE</span>
+            </div>
+            <div class="flip-inner h-full">
+              <div class="flip-front">
+                <div class="flex items-center justify-between pb-1 text-slate-400">
+                  <span class="drag-handle text-[10px] tracking-wider uppercase font-sans font-bold cursor-grab">⋮⋮ DRAG</span>
+                  <div class="flex items-center gap-1">
+                    <button class="cycle-theme-btn text-pink-600 hover:text-pink-800 p-0.5 rounded transition" title="Change Theme Frame">🎨</button>
+                    <button class="cycle-color-btn text-amber-600 hover:text-amber-800 p-0.5 rounded transition" title="Change Text Color">🖍️</button>
+                    <button class="story-card-btn text-rose-500 hover:text-rose-700 p-0.5 rounded transition" title="Export for Instagram Story (9:16)">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    </button>
+                    <button class="flip-card-btn text-slate-500 hover:text-amber-600 p-0.5 rounded transition" title="Flip to Secret Back Note">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                    <button class="download-card-btn text-slate-500 hover:text-slate-900 p-0.5 rounded transition" title="Download Polaroid">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </button>
+                    <button class="delete-card-btn text-rose-400 hover:text-rose-600 p-0.5 rounded transition" title="Delete">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="polaroid-img-wrapper">
+                  <img src="${item.url}" alt="Snapshot" loading="lazy" />
+                </div>
+                <div class="caption-text ${cardFont} font-bold text-center text-lg mt-2 leading-tight tracking-wide editable-text outline-none px-1 rounded hover:bg-slate-100/50 transition cursor-text" style="color: ${cardTextColor};" contenteditable="true" spellcheck="false" title="Click to customize caption">
+                  ${item.caption}
+                </div>
+                <div class="date-text font-mono text-[10px] text-center mt-1 tracking-wider editable-text outline-none px-1 rounded hover:bg-slate-100/50 transition cursor-text" style="color: ${cardTextColor};" contenteditable="true" spellcheck="false" title="Click to edit date">
+                  ${item.date}
+                </div>
+              </div>
+              <div class="flip-back p-1 text-left flex flex-col justify-between">
+                <div class="flex items-center justify-between pb-1 border-b border-slate-200">
+                  <span class="text-[10px] font-sans font-bold text-amber-700 uppercase">🔒 Photo Note</span>
+                  <button class="flip-card-btn text-slate-500 hover:text-slate-800 text-xs px-1 font-bold" title="Flip Back">✕ Back</button>
+                </div>
+                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto my-1 border border-amber-200" contenteditable="true" spellcheck="false" placeholder="Write a secret note on the back of this photo...">
+                  ${item.secretNote || 'No secret note yet. Click to write one...'}
+                </div>
+                <div class="text-[9px] text-slate-400 text-center font-sans">Flipped Polaroid Back</div>
+              </div>
+            </div>
+          `;
+        }
+
+        const captionElem = card.querySelector('.caption-text');
+        const dateElem = card.querySelector('.date-text');
+        const dlBtn = card.querySelector('.download-card-btn');
+        const delBtn = card.querySelector('.delete-card-btn');
+        const flipBtns = card.querySelectorAll('.flip-card-btn');
+        const secretInput = card.querySelector('.secret-text-input');
+        const secretBoxOutline = card.querySelector('.secret-box-outline');
+        const themeBtn = card.querySelector('.cycle-theme-btn');
+        const colorBtn = card.querySelector('.cycle-color-btn');
+        const storyBtn = card.querySelector('.story-card-btn');
+        const pinBadgeBtn = card.querySelector('.pinboard-pill-badge');
+        const photoWrapper = card.querySelector('.polaroid-img-wrapper');
+
+        card.addEventListener('pointerdown', () => {
+          activeCardId = item.id;
+          document.querySelectorAll('.polaroid-card').forEach(c => c.classList.remove('active-selected'));
+          card.classList.add('active-selected');
+          if (item.fontColor) {
+            fontColorDot.style.backgroundColor = item.fontColor;
+            customColorInput.value = item.fontColor;
+          }
+        });
+
+        if (storyBtn) {
+          storyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            exportToInstagramStory(item);
+          });
+        }
+
+        if (colorBtn) {
+          colorBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeCardId = item.id;
+            const colorPalette = ['#1e293b', '#f472b6', '#e11d48', '#78350f', '#16a34a', '#2563eb', '#9333ea', '#ea580c', '#ffffff'];
+            const curIdx = colorPalette.indexOf(item.fontColor || '#1e293b');
+            item.fontColor = colorPalette[(curIdx + 1) % colorPalette.length];
+            applyActiveColor(item.fontColor);
+            saveData();
+            showToast('Text color changed!');
+          });
+        }
+
+        if (pinBadgeBtn) {
+          pinBadgeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.isPublicPinned = !item.isPublicPinned;
+            saveData();
+            renderBoard();
+            showToast(item.isPublicPinned ? '📌 Added to Public Pinboard!' : 'Removed from Public Pinboard');
+          });
+        }
+
+        if (photoWrapper) {
+          photoWrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.isFlipped = !item.isFlipped;
+            card.classList.toggle('flipped', item.isFlipped);
+            saveData();
+          });
+        }
+
+        if (captionElem) {
+          captionElem.addEventListener('blur', () => {
+            item.caption = captionElem.textContent.trim() || 'MAY I MEET YOU';
+            saveData();
+          });
+        }
+
+        if (dateElem) {
+          dateElem.addEventListener('blur', () => {
+            item.date = dateElem.textContent.trim() || getFormattedDate();
+            saveData();
+          });
+        }
+
+        if (secretInput) {
+          secretInput.addEventListener('blur', () => {
+            item.secretNote = secretInput.textContent.trim();
+            saveData();
+          });
+        }
+
+        if (themeBtn) {
+          themeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeCardId = item.id;
+            const themeKeys = ['classic', 'kiss', 'ribbon', 'crimson', 'heart', 'star'];
+            const curIdx = themeKeys.indexOf(item.theme || 'classic');
+            item.theme = themeKeys[(curIdx + 1) % themeKeys.length];
+            saveData();
+            renderBoard();
+            showToast(`Theme: ${item.theme}`);
+          });
+        }
+
+        flipBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.isFlipped = !item.isFlipped;
+            card.classList.toggle('flipped', item.isFlipped);
+            saveData();
+          });
+        });
+
+        if (secretBoxOutline) {
+          secretBoxOutline.addEventListener('click', () => {
+            item.isFlipped = true;
+            card.classList.add('flipped');
+            saveData();
+          });
+        }
+
+        dlBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          downloadSinglePolaroid(item.id);
+        });
+
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deletePolaroid(item.id);
+        });
+
+        setupDraggable(card, item);
+        pinboardContainer.appendChild(card);
+      });
+
+      updateCounter();
+    }
+
+    function setupDraggable(element, item) {
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+      function onPointerDown(e) {
+        if (e.target.closest('.editable-text') || e.target.closest('button')) return;
+        isDragging = true;
+        highestZ++;
+        element.style.zIndex = highestZ;
+
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+        startX = clientX;
+        startY = clientY;
+        initialLeft = parseFloat(element.style.left) || 0;
+        initialTop = parseFloat(element.style.top) || 0;
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        if (e.cancelable) e.preventDefault();
+        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
+        const boardRect = pinboardContainer.getBoundingClientRect();
+        const cardRect = element.getBoundingClientRect();
+
+        let newX = Math.max(0, Math.min(initialLeft + deltaX, boardRect.width - cardRect.width));
+        let newY = Math.max(0, Math.min(initialTop + deltaY, boardRect.height - cardRect.height));
+        element.style.left = `${newX}px`;
+        element.style.top = `${newY}px`;
+      }
+
+      function onPointerUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        item.x = parseFloat(element.style.left);
+        item.y = parseFloat(element.style.top);
+        saveData();
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+      }
+
+      element.addEventListener('pointerdown', onPointerDown);
+    }
+
+    function applyNightFlashExposure(ctx, size) {
+      try {
+        const imgData = ctx.getImageData(0, 0, size, size);
+        const data = imgData.data;
+        let totalLum = 0;
+        const step = 8;
+        let sampled = 0;
+        for (let i = 0; i < data.length; i += 4 * step) {
+          totalLum += (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+          sampled++;
+        }
+        const avgLum = sampled > 0 ? totalLum / sampled : 128;
+        const boostFactor = avgLum < 80 ? 1.75 : (avgLum < 120 ? 1.45 : 1.15);
+        const gamma = avgLum < 80 ? 0.8 : 0.9;
+
+        for (let i = 0; i < data.length; i += 4) {
+          let r = Math.pow(data[i] / 255, gamma) * 255 * boostFactor;
+          let g = Math.pow(data[i + 1] / 255, gamma) * 255 * boostFactor;
+          let b = Math.pow(data[i + 2] / 255, gamma) * 255 * boostFactor;
+          data[i] = Math.min(255, r * 1.05);
+          data[i + 1] = Math.min(255, g * 1.01);
+          data[i + 2] = Math.min(255, b * 0.96);
+        }
+        ctx.putImageData(imgData, 0, 0);
+      } catch (e) {}
+
+      const flashGrad = ctx.createRadialGradient(size * 0.5, size * 0.44, size * 0.05, size * 0.5, size * 0.5, size * 0.72);
+      flashGrad.addColorStop(0, 'rgba(255, 255, 255, 0.32)');
+      flashGrad.addColorStop(0.35, 'rgba(255, 248, 235, 0.12)');
+      flashGrad.addColorStop(0.75, 'rgba(25, 20, 15, 0.08)');
+      flashGrad.addColorStop(1, 'rgba(10, 8, 15, 0.45)');
+      ctx.fillStyle = flashGrad;
+      ctx.fillRect(0, 0, size, size);
+    }
+
+    async function takeSnapshot() {
+      const isFlashActive = (flashMode === 'on');
+      if (isFlashActive) {
+        flashIlluminator.style.opacity = '1';
+        await setHardwareTorch(true);
+        flashCapsule.classList.remove('flash-burst-active');
+        void flashCapsule.offsetWidth;
+        flashCapsule.classList.add('flash-burst-active');
+        await new Promise(res => setTimeout(res, 160));
+        flashScreen.style.opacity = '1';
+      }
+
+      playMechanicalShutterSound(isFlashActive);
+
+      const width = video.videoWidth || 640;
+      const height = video.videoHeight || 640;
+      const cropSize = Math.min(width, height);
+      hiddenCanvas.width = cropSize;
+      hiddenCanvas.height = cropSize;
+      const ctx = hiddenCanvas.getContext('2d');
+
+      ctx.translate(cropSize, 0);
+      ctx.scale(-1, 1);
+      const sx = (width - cropSize) / 2;
+      const sy = (height - cropSize) / 2;
+
+      try {
+        if (video.readyState >= 2) {
+          ctx.drawImage(video, sx, sy, cropSize, cropSize, 0, 0, cropSize, cropSize);
+        } else {
+          ctx.fillStyle = '#334155';
+          ctx.fillRect(0, 0, cropSize, cropSize);
+        }
+      } catch (err) {
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(0, 0, cropSize, cropSize);
+      }
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+      if (isFlashActive) {
+        applyNightFlashExposure(ctx, cropSize);
+      } else {
+        ctx.fillStyle = 'rgba(255, 235, 210, 0.04)';
+        ctx.fillRect(0, 0, cropSize, cropSize);
+      }
+
+      if (isFlashActive) {
+        setTimeout(async () => {
+          flashScreen.style.opacity = '0';
+          flashIlluminator.style.opacity = '0';
+          await setHardwareTorch(false);
+        }, 120);
+      }
+
+      const imageUrl = hiddenCanvas.toDataURL('image/jpeg', 0.92);
+      const boardRect = pinboardContainer.getBoundingClientRect();
+      const randomX = Math.floor(Math.random() * Math.max(20, (boardRect.width || 600) - 220)) + 20;
+      const randomY = Math.floor(Math.random() * Math.max(20, (boardRect.height || 500) - 250)) + 20;
+      const randomRot = (Math.random() * 14 - 7).toFixed(1);
+
+      const newPolaroid = {
+        id: `snap-${Date.now()}`,
+        type: 'photo',
+        theme: activeCardTheme,
+        font: activeFontClass,
+        fontColor: activeFontColor,
+        url: imageUrl,
+        caption: 'MAY I MEET YOU',
+        secretNote: 'A memorable snapshot in time.',
+        date: getFormattedDate(),
+        x: Math.max(10, randomX),
+        y: Math.max(10, randomY),
+        rot: parseFloat(randomRot),
+        isFlipped: false
+      };
+
+      polaroids.unshift(newPolaroid);
+      activeCardId = newPolaroid.id;
+      saveData();
+      renderBoard();
+      showToast(isFlashActive ? '⚡ Night Flash fired! Clear photo captured.' : '📷 Photo snapped!');
+    }
+
+    shutterBtn.addEventListener('click', takeSnapshot);
+
+    addSecretCardBtn.addEventListener('click', () => {
+      const boardRect = pinboardContainer.getBoundingClientRect();
+      const randomX = Math.floor(Math.random() * Math.max(20, (boardRect.width || 600) - 220)) + 20;
+      const randomY = Math.floor(Math.random() * Math.max(20, (boardRect.height || 500) - 250)) + 20;
+      const randomRot = (Math.random() * 14 - 7).toFixed(1);
+
+      const newSecretCard = {
+        id: `secret-${Date.now()}`,
+        type: 'secret-card',
+        theme: activeCardTheme,
+        font: activeFontClass,
+        fontColor: activeFontColor,
+        caption: 'SECRET MESSAGE',
+        secretNote: 'meet me after sunset behind the cinema 🍿✨',
+        date: getFormattedDate(),
+        x: Math.max(10, randomX),
+        y: Math.max(10, randomY),
+        rot: parseFloat(randomRot),
+        isFlipped: false
+      };
+
+      polaroids.unshift(newSecretCard);
+      activeCardId = newSecretCard.id;
+      saveData();
+      renderBoard();
+      showToast('Secret Message Card placed on desk!');
+    });
+
+    function renderGalleryModal() {
+      modalGrid.innerHTML = '';
+      if (polaroids.length === 0) {
+        modalGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-caveat text-xl">No memories stored in the archive yet.</div>`;
+        return;
+      }
+
+      polaroids.forEach(item => {
+        const itemCard = document.createElement('div');
+        itemCard.className = 'group relative bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col items-center shadow-sm hover:shadow-md transition';
+
+        if (item.type === 'secret-card') {
+          itemCard.innerHTML = `
+            <div class="w-full aspect-square rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 mb-2 cursor-pointer flex flex-col items-center justify-center p-2 text-center group-hover:scale-105 transition duration-200">
+              <span class="text-xl">✉</span>
+              <span class="font-caveat font-bold text-amber-900 text-xs mt-1">SECRET NOTE</span>
+            </div>
+            <span class="font-caveat font-bold text-slate-800 text-sm truncate max-w-full text-center">${item.caption}</span>
+            <span class="font-mono text-[9px] text-slate-400 text-center">${item.date}</span>
+            <div class="flex gap-2 mt-2 w-full">
+              <button class="modal-dl flex-1 bg-amber-800 text-white rounded-lg py-1 text-[10px] font-bold hover:bg-amber-900 transition">Save</button>
+              <button class="modal-story bg-pink-100 text-pink-700 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-pink-200 transition" title="Export as 9:16 Instagram Story">📱 Story</button>
+              <button class="modal-del bg-rose-100 text-rose-600 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-rose-200 transition">✕</button>
+            </div>
+          `;
+        } else {
+          itemCard.innerHTML = `
+            <div class="w-full aspect-square rounded-lg overflow-hidden bg-slate-900 mb-2 cursor-pointer">
+              <img src="${item.url}" alt="${item.caption}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            </div>
+            <span class="font-caveat font-bold text-slate-800 text-sm truncate max-w-full text-center">${item.caption}</span>
+            <span class="font-mono text-[9px] text-slate-400 text-center">${item.date}</span>
+            <div class="flex gap-2 mt-2 w-full">
+              <button class="modal-dl flex-1 bg-slate-900 text-white rounded-lg py-1 text-[10px] font-bold hover:bg-slate-700 transition">Save</button>
+              <button class="modal-story bg-pink-100 text-pink-700 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-pink-200 transition" title="Export as 9:16 Instagram Story">📱 Story</button>
+              <button class="modal-del bg-rose-100 text-rose-600 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-rose-200 transition">✕</button>
+            </div>
+          `;
+        }
+
+        itemCard.onclick = (e) => {
+          if (!e.target.closest('button')) downloadSinglePolaroid(item.id);
+        };
+        itemCard.querySelector('.modal-dl').onclick = (e) => {
+          e.stopPropagation();
+          downloadSinglePolaroid(item.id);
+        };
+        itemCard.querySelector('.modal-story').onclick = (e) => {
+          e.stopPropagation();
+          exportToInstagramStory(item);
+        };
+        itemCard.querySelector('.modal-del').onclick = (e) => {
+          e.stopPropagation();
+          deletePolaroid(item.id);
+        };
+
+        modalGrid.appendChild(itemCard);
+      });
+    }
+
+    openGalleryBtn.addEventListener('click', () => {
+      renderGalleryModal();
+      galleryModal.classList.remove('hidden');
+    });
+
+    closeGalleryBtn.addEventListener('click', () => galleryModal.classList.add('hidden'));
+    closeModalBottomBtn.addEventListener('click', () => galleryModal.classList.add('hidden'));
+    galleryModal.addEventListener('click', (e) => {
+      if (e.target === galleryModal) galleryModal.classList.add('hidden');
+    });
+
+    downloadAllBtn.addEventListener('click', () => {
+      if (polaroids.length === 0) {
+        showToast('No cards to download!');
+        return;
+      }
+      showToast('Exporting all polaroid cards in sequence...');
+      polaroids.forEach((item, idx) => {
+        setTimeout(() => downloadSinglePolaroid(item.id), idx * 450);
+      });
+    });
+
+    resetBoardBtn.addEventListener('click', () => {
+      polaroids = [...DEFAULT_PHOTOS];
+      activeCardId = null;
+      saveData();
+      renderBoard();
+      showToast('Desk reset to initial layout');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      applyTheme(currentTheme);
+      updateFlashUI();
+      initWebcam();
+      loadData();
+    });
+
+    window.addEventListener('resize', () => {
+      renderBoard();
+    });
+    const PNG_STICKER_PRESETS = {
+  bow: "stickers/pink-bow.png",          // or a full URL like "https://i.imgur.com/xyz.png"
+  kiss: "stickers/lipstick-kiss.png",
+  flower: "stickers/cosmos-flower.png",
+  tulips: "stickers/white-tulips.png",
+  star: "stickers/blue-star.png"
+};
+  </script>
+</body>
+</html>
