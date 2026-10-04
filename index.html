@@ -32,7 +32,7 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Caveat, Fredoka, Playwrite, Space Mono -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Playwrite+US+Trad:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -54,16 +54,8 @@
     body.theme-mint { --camera-base: #bbf7d0; --camera-light: #f0fdf4; --camera-shadow: #86efac; --camera-accent: #14532d; --lens-ring-base: #a7f3d0; --lens-ring-inner: #4ade80; }
     body.theme-butter { --camera-base: #fef08a; --camera-light: #fefce8; --camera-shadow: #fde047; --camera-accent: #713f12; --lens-ring-base: #fef9c3; --lens-ring-inner: #facc15; }
 
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .editable-text {
-      user-select: text;
-      -webkit-user-select: text;
-    }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    .editable-text { user-select: text; -webkit-user-select: text; }
 
     body {
       background-color: #d1d5db;
@@ -98,10 +90,23 @@
     .theme-deco-heart { position: absolute; bottom: 8px; right: 12px; width: 22px; height: 22px; pointer-events: none; z-index: 14; filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.3)); }
     .theme-deco-star { position: absolute; bottom: 6px; left: 8px; width: 24px; height: 24px; pointer-events: none; z-index: 14; filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.35)); }
 
-    .camera-ground-wrapper { position: relative; display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0 20px 24px rgba(44, 38, 30, 0.24)); z-index: 20; }
-    .camera-ground-shadow { position: absolute; bottom: -10px; left: 8%; width: 84%; height: 22px; border-radius: 50%; background: radial-gradient(ellipse at center, rgba(35, 27, 20, 0.45) 0%, rgba(35, 27, 20, 0.2) 50%, transparent 75%); filter: blur(6px); pointer-events: none; z-index: 0; }
+    /* Camera Base Layout */
+    .camera-ground-wrapper { 
+      position: relative; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      /* REMOVED filter: drop-shadow here so 3D transform-style works */
+      z-index: 20; 
+    }
+    
+    .camera-ground-shadow { 
+      position: absolute; bottom: -10px; left: 8%; width: 84%; height: 22px; 
+      border-radius: 50%; background: radial-gradient(ellipse at center, rgba(35, 27, 20, 0.45) 0%, rgba(35, 27, 20, 0.2) 50%, transparent 75%); 
+      filter: blur(6px); pointer-events: none; z-index: 0; 
+    }
 
-    /* 3D Flip Camera Structure */
+    /* 3D Flip Mechanics */
     .camera-3d-scene {
       perspective: 1200px;
       --cam-scale: 0.72;
@@ -112,7 +117,6 @@
       margin-bottom: calc(334px * (var(--cam-scale) - 1));
       z-index: 10;
     }
-
     @media (min-width: 640px) { .camera-3d-scene { --cam-scale: 0.88; } }
     @media (min-width: 1024px) { .camera-3d-scene { --cam-scale: 1; margin-bottom: 0; } }
 
@@ -135,78 +139,37 @@
       -webkit-backface-visibility: hidden;
       background: radial-gradient(circle at 38% 28%, var(--camera-light) 0%, var(--camera-base) 60%, var(--camera-shadow) 100%);
       border-radius: 58px 46px 52px 52px;
-      box-shadow: inset 0 4px 10px rgba(255, 255, 255, 0.95), inset 0 -8px 16px rgba(120, 100, 75, 0.22), inset 2px 0 6px rgba(255, 255, 255, 0.6), inset -2px 0 6px rgba(0, 0, 0, 0.08);
+      /* Box shadow applied directly to faces to simulate the drop shadow we removed from wrapper */
+      box-shadow: 0 20px 24px rgba(44, 38, 30, 0.24), inset 0 4px 10px rgba(255, 255, 255, 0.95), inset 0 -8px 16px rgba(120, 100, 75, 0.22), inset 2px 0 6px rgba(255, 255, 255, 0.6), inset -2px 0 6px rgba(0, 0, 0, 0.08);
       transition: background 0.35s ease;
     }
 
     .camera-face-back {
       transform: rotateY(180deg);
-      border-radius: 46px 58px 52px 52px; /* Mirrored corner radius for back */
+      border-radius: 46px 58px 52px 52px; 
     }
 
     /* Back Face Details */
     .film-door-panel {
-      position: absolute;
-      top: 24px;
-      left: 18px;
-      right: 76px;
-      bottom: 24px;
-      border: 3px solid rgba(0,0,0,0.03);
-      border-radius: 12px;
+      position: absolute; top: 24px; left: 18px; right: 76px; bottom: 24px;
+      border: 3px solid rgba(0,0,0,0.03); border-radius: 12px;
       box-shadow: inset 2px 2px 5px rgba(0,0,0,0.06), inset -2px -2px 5px rgba(255,255,255,0.7);
-      background: var(--camera-base);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      background: var(--camera-base); overflow: hidden; display: flex; align-items: center; justify-content: center;
       transition: background 0.35s ease;
     }
     .film-door-latch {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 26px;
-      height: 8px;
-      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%);
-      border-radius: 4px;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.2);
-      z-index: 10;
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 26px; height: 8px;
+      background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 100%); border-radius: 4px;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.9), 0 2px 4px rgba(0,0,0,0.2); z-index: 10;
     }
     .back-viewfinder-eyepiece {
-      position: absolute;
-      top: 24px;
-      right: 22px;
-      width: 44px;
-      height: 44px;
-      background: #111827;
-      border-radius: 50%;
-      border: 4px solid #334155;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2), inset 0 2px 5px #000;
+      position: absolute; top: 24px; right: 22px; width: 44px; height: 44px; background: #111827; border-radius: 50%; border: 4px solid #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.2), inset 0 2px 5px #000;
     }
     .back-viewfinder-eyepiece::after {
-      content: '';
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      width: 20px;
-      height: 20px;
-      background: #1f2937;
-      border-radius: 4px;
-      box-shadow: inset 0 0 6px #000;
+      content: ''; position: absolute; top: 8px; left: 8px; width: 20px; height: 20px; background: #1f2937; border-radius: 4px; box-shadow: inset 0 0 6px #000;
     }
     .film-counter-window {
-      position: absolute;
-      bottom: 120px;
-      right: 24px;
-      width: 14px;
-      height: 18px;
-      background: #0f172a;
-      border-radius: 8px;
-      box-shadow: inset 0 2px 4px #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: absolute; bottom: 120px; right: 24px; width: 14px; height: 18px; background: #0f172a; border-radius: 8px; box-shadow: inset 0 2px 4px #000; display: flex; align-items: center; justify-content: center;
     }
 
     /* Front Face Details */
@@ -496,6 +459,7 @@
     let audioCtx = null;
     let flashMode = 'on';
     let activeFacingMode = 'user'; // 'user' (front) or 'environment' (back)
+    let currentStream = null;
     let videoTrack = null;
 
     const EMBEDDED_FIREBASE_CONFIG = {
@@ -569,7 +533,8 @@
 
     const DEFAULT_PHOTOS = [
       { id: 'secret-card-init', type: 'secret-card', theme: 'ribbon', font: 'font-caveat', fontColor: '#831843', caption: 'SECRET MESSAGE', secretNote: 'meet me after sunset behind the cinema 🍿✨', date: getFormattedDate(), x: 18, y: 24, rot: -4, isFlipped: false },
-      { id: 'cat-sample-1', type: 'photo', theme: 'kiss', font: 'font-caveat', fontColor: '#f472b6', url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop&q=80', caption: 'MAY I MEET YOU', secretNote: 'Always wearing our shades indoors 😎', date: getFormattedDate(), x: 65, y: 190, rot: 3, isFlipped: false }
+      { id: 'cat-sample-1', type: 'photo', theme: 'kiss', font: 'font-caveat', fontColor: '#f472b6', url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=500&auto=format&fit=crop&q=80', caption: 'MAY I MEET YOU', secretNote: 'Always wearing our shades indoors 😎', date: getFormattedDate(), x: 65, y: 190, rot: 3, isFlipped: false },
+      { id: 'cat-sample-2', type: 'photo', theme: 'star', font: 'font-fredoka', fontColor: '#0f172a', url: 'Music Cover Photos_2.jpg', caption: 'CHILL VIBES', secretNote: 'Cool cat with headphones 🎧', date: getFormattedDate(), x: 120, y: 350, rot: -2, isFlipped: false }
     ];
 
     themeSelect.value = activeCardTheme;
@@ -655,23 +620,39 @@
 
     // -- 3D FLIP & CAMERA SWITCH LOGIC --
     async function initWebcam() {
+      // Must properly stop active tracks before requesting a new hardware camera lens
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+      
       try {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 720 }, height: { ideal: 720 }, facingMode: activeFacingMode },
+        const constraints = {
+          video: activeFacingMode === 'environment' 
+            ? { facingMode: { exact: 'environment' }, width: { ideal: 720 }, height: { ideal: 720 } }
+            : { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 720 } },
+          audio: false
+        };
+        
+        try {
+          currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (strictErr) {
+          // Fallback if 'exact' environment isn't supported (e.g. desktop webcams)
+          currentStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: activeFacingMode },
             audio: false
           });
-          videoFront.srcObject = stream;
-          videoBack.srcObject = stream;
-          videoTrack = stream.getVideoTracks()[0] || null;
+        }
+        
+        videoFront.srcObject = currentStream;
+        videoBack.srcObject = currentStream;
+        videoTrack = currentStream.getVideoTracks()[0] || null;
 
-          if (activeFacingMode === 'environment') {
-            videoFront.style.transform = 'scaleX(1)';
-            videoBack.style.transform = 'scaleX(1)';
-          } else {
-            videoFront.style.transform = 'scaleX(-1)';
-            videoBack.style.transform = 'scaleX(-1)';
-          }
+        if (activeFacingMode === 'environment') {
+          videoFront.style.transform = 'scaleX(1)';
+          videoBack.style.transform = 'scaleX(1)';
+        } else {
+          videoFront.style.transform = 'scaleX(-1)';
+          videoBack.style.transform = 'scaleX(-1)';
         }
       } catch (err) {
         showToast('Camera active in demo preview mode');
@@ -700,7 +681,6 @@
       }
 
       // Restart stream
-      if (videoTrack) videoTrack.stop();
       await initWebcam();
       showToast(activeFacingMode === 'environment' ? '📷 Switched to Back Camera' : '🤳 Switched to Front Camera');
     });
