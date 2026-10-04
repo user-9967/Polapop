@@ -24,6 +24,12 @@
 <meta name="twitter:title" content="Polapop - Retro Digicam & Public Pinboard" />
 <meta name="twitter:description" content="Snap retro polaroids, flip to write secret notes, and pin memories to the global desk gallery." />
 <meta name="twitter:image" content="https://polapop-six.vercel.app/og-preview.jpg" />
+
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts: Caveat, Fredoka, Playwrite, Space Mono -->
@@ -142,13 +148,12 @@
       border-color: #fda4af !important;
     }
 
-    /* Vector SVG Decorations */
     .theme-deco-blossom {
       position: absolute;
       top: -18px;
       left: -16px;
-      width: 62px;
-      height: 62px;
+      width: 54px;
+      height: 54px;
       z-index: 25;
       pointer-events: none;
       filter: drop-shadow(0 4px 8px rgba(0,0,0,0.22));
@@ -159,7 +164,7 @@
       bottom: 6px;
       left: 0;
       right: 0;
-      height: 24px;
+      height: 22px;
       background: linear-gradient(90deg, rgba(254, 215, 226, 0.95) 0%, rgba(251, 207, 232, 0.9) 30%, rgba(244, 114, 182, 0.85) 60%, rgba(251, 207, 232, 0.95) 100%);
       box-shadow: 0 1px 3px rgba(190, 24, 93, 0.15);
       border-top: 1px solid rgba(244, 114, 182, 0.6);
@@ -167,7 +172,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      padding-right: 48px;
+      padding-right: 42px;
       pointer-events: none;
       z-index: 18;
     }
@@ -176,30 +181,19 @@
       position: absolute;
       bottom: -6px;
       right: 2px;
-      width: 58px;
-      height: 52px;
+      width: 50px;
+      height: 46px;
       pointer-events: none;
       z-index: 26;
       filter: drop-shadow(0 4px 6px rgba(190, 24, 93, 0.28));
-    }
-
-    .theme-deco-kiss {
-      position: absolute;
-      bottom: 8px;
-      right: 10px;
-      width: 44px;
-      height: 32px;
-      pointer-events: none;
-      z-index: 20;
-      filter: drop-shadow(0 2px 5px rgba(185, 28, 28, 0.35));
     }
 
     .theme-deco-tulips {
       position: absolute;
       bottom: 2px;
       left: 4px;
-      width: 52px;
-      height: 72px;
+      width: 48px;
+      height: 64px;
       pointer-events: none;
       z-index: 22;
       filter: drop-shadow(0 4px 7px rgba(0,0,0,0.38));
@@ -209,8 +203,8 @@
       position: absolute;
       bottom: 8px;
       right: 12px;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       pointer-events: none;
       z-index: 14;
       filter: drop-shadow(0 2px 4px rgba(225, 29, 72, 0.3));
@@ -220,8 +214,8 @@
       position: absolute;
       bottom: 6px;
       left: 8px;
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       pointer-events: none;
       z-index: 14;
       filter: drop-shadow(0 2px 4px rgba(37, 99, 235, 0.35));
@@ -232,27 +226,30 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      filter: drop-shadow(0 32px 36px rgba(44, 38, 30, 0.28))
-              drop-shadow(0 14px 18px rgba(44, 38, 30, 0.18))
-              drop-shadow(0 4px 6px rgba(44, 38, 30, 0.12));
+      filter: drop-shadow(0 20px 24px rgba(44, 38, 30, 0.24));
     }
 
     .camera-ground-shadow {
       position: absolute;
-      bottom: -14px;
-      left: 5%;
-      width: 90%;
-      height: 28px;
+      bottom: -10px;
+      left: 8%;
+      width: 84%;
+      height: 22px;
       border-radius: 50%;
       background: radial-gradient(ellipse at center, rgba(35, 27, 20, 0.45) 0%, rgba(35, 27, 20, 0.2) 50%, transparent 75%);
-      filter: blur(7px);
+      filter: blur(6px);
       pointer-events: none;
       z-index: 0;
     }
 
+    /* Responsive Camera Scaling */
     .instax-camera {
+      --cam-scale: 0.72;
       width: 326px;
       height: 334px;
+      transform: scale(var(--cam-scale));
+      transform-origin: top center;
+      margin-bottom: calc(334px * (var(--cam-scale) - 1));
       background: radial-gradient(circle at 38% 28%, var(--camera-light) 0%, var(--camera-base) 60%, var(--camera-shadow) 100%);
       border-radius: 58px 46px 52px 52px;
       box-shadow: 
@@ -261,8 +258,21 @@
         inset 2px 0 6px rgba(255, 255, 255, 0.6),
         inset -2px 0 6px rgba(0, 0, 0, 0.08);
       position: relative;
-      transition: background 0.35s ease;
+      transition: background 0.35s ease, transform 0.2s ease;
       z-index: 1;
+    }
+
+    @media (min-width: 640px) {
+      .instax-camera {
+        --cam-scale: 0.88;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .instax-camera {
+        --cam-scale: 1;
+        margin-bottom: 0;
+      }
     }
 
     .camera-parting-seam {
@@ -350,7 +360,6 @@
       box-shadow: 0 0 6px #60a5fa;
     }
 
-    /* Clear acrylic flash capsule */
     .flash-capsule {
       position: absolute;
       top: 24px;
@@ -553,22 +562,30 @@
       box-shadow: inset 0 0 12px rgba(0,0,0,0.6);
     }
 
+    /* Polaroid Cards Scaled for Mobile Comfort */
     .polaroid-card {
       position: absolute;
-      width: 175px;
+      width: 155px;
       background: #ffffff;
-      padding: 10px 10px 16px 10px;
+      padding: 8px 8px 14px 8px;
       border-radius: 4px;
-      box-shadow: 0 14px 28px rgba(30, 41, 59, 0.2), 0 6px 10px rgba(30, 41, 59, 0.12);
+      box-shadow: 0 12px 24px rgba(30, 41, 59, 0.2), 0 4px 8px rgba(30, 41, 59, 0.12);
       cursor: grab;
       touch-action: none;
       perspective: 1000px;
       transition: box-shadow 0.2s ease, transform 0.15s ease, outline 0.15s ease;
     }
 
+    @media (min-width: 640px) {
+      .polaroid-card {
+        width: 180px;
+        padding: 10px 10px 16px 10px;
+      }
+    }
+
     .polaroid-card:active {
       cursor: grabbing;
-      box-shadow: 0 22px 35px rgba(30, 41, 59, 0.3), 0 10px 16px rgba(30, 41, 59, 0.18);
+      box-shadow: 0 20px 32px rgba(30, 41, 59, 0.32);
     }
 
     .polaroid-card.active-selected {
@@ -600,11 +617,6 @@
       transition: background-color 0.2s, border-color 0.2s;
     }
 
-    .secret-box-outline:hover {
-      background-color: #f1f5f9;
-      border-color: #64748b;
-    }
-
     .flip-inner {
       position: relative;
       width: 100%;
@@ -625,10 +637,10 @@
       transform: translateX(-50%);
       background: #dc2626;
       color: #ffffff;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
       letter-spacing: 0.5px;
-      padding: 3px 12px;
+      padding: 3px 10px;
       border-radius: 9999px;
       box-shadow: 0 4px 10px rgba(220, 38, 38, 0.45), 0 1px 3px rgba(0, 0, 0, 0.2);
       border: 1.5px solid #fecaca;
@@ -650,79 +662,6 @@
       background: #059669;
       border-color: #a7f3d0;
       box-shadow: 0 4px 10px rgba(5, 150, 105, 0.45);
-    }
-
-    .flip-back-prompt {
-      position: absolute;
-      top: 52%;
-      right: -210px;
-      transform: translateY(-50%) translateX(-8px) scale(0.92);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      z-index: 35;
-      cursor: pointer;
-      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), 
-                  transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                  visibility 0.22s ease;
-      white-space: nowrap;
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.18));
-    }
-
-    .polaroid-card:hover .flip-back-prompt,
-    .polaroid-card:focus-within .flip-back-prompt,
-    .polaroid-card.card-touched .flip-back-prompt {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: translateY(-50%) translateX(0) scale(1);
-    }
-
-    .polaroid-card.flipped .flip-back-prompt {
-      opacity: 0 !important;
-      visibility: hidden !important;
-      pointer-events: none !important;
-    }
-
-    .circular-flip-disc {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.92);
-      backdrop-filter: blur(4px);
-      border: 1.5px solid #1e293b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      transition: transform 0.18s ease, background 0.15s ease, border-color 0.15s ease;
-      flex-shrink: 0;
-    }
-
-    .flip-back-prompt:hover .circular-flip-disc {
-      transform: scale(1.12) rotate(-35deg);
-      background: #fef3c7;
-      border-color: #d97706;
-    }
-
-    .doodle-loop-arrow {
-      width: 44px;
-      height: 26px;
-      flex-shrink: 0;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
-    }
-
-    .doodle-flip-text {
-      font-family: 'Caveat', cursive;
-      font-weight: 700;
-      font-size: 14px;
-      color: #0f172a;
-      letter-spacing: 0.8px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 2px rgba(255,255,255,0.8);
     }
 
     .flip-front, .flip-back {
@@ -768,31 +707,19 @@
       backdrop-filter: blur(6px);
       background: rgba(15, 23, 42, 0.65);
     }
-    /* Ensure the desk allows comfortable touch movement and panning on phones */
-#desk {
-  touch-action: none; /* Prevents whole-page bouncing during card dragging */
-  min-height: 80vh;
-  position: relative;
-  overflow: hidden;
-}
 
-/* Ensure polaroid cards handle touches smoothly */
-.polaroid-card {
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: grab;
-}
-
-.polaroid-card:active {
-  cursor: grabbing;
-}
+    /* Desk Container Styling */
+    #pinboardContainer {
+      touch-action: none;
+      position: relative;
+      overflow: hidden;
+    }
   </style>
 </head>
 
-<body class="flex flex-col justify-between p-4 md:p-7 min-h-screen theme-cream">
-  <header class="w-full flex flex-wrap items-center justify-between gap-3 z-30">
-    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-pink-100 hover:bg-pink-200 text-pink-600 font-bold border-2 border-pink-400 rounded-full px-4 py-1.5 text-xs md:text-sm tracking-wide transition-all shadow-sm active:scale-95">
+<body class="flex flex-col justify-between p-3 md:p-6 min-h-screen theme-cream">
+  <header class="w-full flex flex-wrap items-center justify-between gap-2.5 z-30">
+    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 bg-pink-100 hover:bg-pink-200 text-pink-600 font-bold border-2 border-pink-400 rounded-full px-3.5 py-1 text-xs md:text-sm tracking-wide transition-all shadow-sm active:scale-95">
       <span>★</span> FOLLOW ME FOR MORE FUN STUFF
     </a>
 
@@ -805,7 +732,7 @@
           <option value="kiss">💋 Lipstick Kiss</option>
           <option value="ribbon">🌸 Ribbon & Flower</option>
           <option value="crimson">🥀 Crimson Tulips</option>
-          <option value="heart">❤️️ Painted Heart</option>
+          <option value="heart">❤ Painted Heart</option>
           <option value="star">⭐ Y2K Blue Star</option>
         </select>
       </div>
@@ -827,24 +754,24 @@
         <span id="fontColorDot" class="w-3.5 h-3.5 rounded-full border border-slate-400 inline-block shadow-inner" style="background-color: #1e293b;"></span>
         <select id="fontColorSelect" class="bg-transparent text-xs font-bold text-slate-800 outline-none cursor-pointer">
           <option value="#1e293b">Classic Ink</option>
-          <option value="#f472b6"> Pastel Pink</option>
-          <option value="#e11d48"> Cherry Rose</option>
-          <option value="#78350f"> Vintage Brown</option>
-          <option value="#16a34a"> Matcha Green</option>
-          <option value="#2563eb"> Retro Blue</option>
-          <option value="#9333ea"> Soft Lilac</option>
-          <option value="#ea580c"> Sunset Orange</option>
-          <option value="#ffffff"> Pure White</option>
+          <option value="#f472b6">Pastel Pink</option>
+          <option value="#e11d48">Cherry Rose</option>
+          <option value="#78350f">Vintage Brown</option>
+          <option value="#16a34a">Matcha Green</option>
+          <option value="#2563eb">Retro Blue</option>
+          <option value="#9333ea">Soft Lilac</option>
+          <option value="#ea580c">Sunset Orange</option>
+          <option value="#ffffff">Pure White</option>
         </select>
         <input type="color" id="customColorInput" value="#1e293b" class="w-4 h-4 p-0 border-0 rounded cursor-pointer ml-0.5" title="Pick custom color" />
       </div>
 
-      <button id="addSecretCardBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border-2 border-amber-400 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95 flex items-center gap-1.5" title="Add a Secret Message Card to Desk">
+      <button id="addSecretCardBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-900 border-2 border-amber-400 rounded-full px-3 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95 flex items-center gap-1.5" title="Add a Secret Message Card to Desk">
         <span>✉️</span> + SECRET NOTE
       </button>
 
       <!-- Flash Toggle Button -->
-      <button id="flashToggleBtn" class="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-900 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95 flex items-center gap-1.5" title="Toggle Flash Mode (Auto / On / Off)">
+      <button id="flashToggleBtn" class="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-900 rounded-full px-3 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95 flex items-center gap-1.5" title="Toggle Flash Mode">
         <span>⚡</span> FLASH: <span id="flashLabel" class="text-amber-500 font-extrabold">ON</span>
       </button>
 
@@ -861,20 +788,21 @@
         </select>
       </div>
 
-      <button id="downloadAllBtn" class="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-900 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95">
+      <button id="downloadAllBtn" class="bg-white hover:bg-slate-100 text-slate-800 border-2 border-slate-900 rounded-full px-3 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95">
         DOWNLOAD
       </button>
 
-      <button id="resetBoardBtn" class="bg-white hover:bg-slate-100 text-rose-600 border-2 border-slate-900 rounded-full px-3.5 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95">
+      <button id="resetBoardBtn" class="bg-white hover:bg-slate-100 text-rose-600 border-2 border-slate-900 rounded-full px-3 py-1 text-xs font-bold tracking-wide shadow transition-all active:scale-95">
         RESET
       </button>
     </div>
   </header>
 
-  <main class="relative flex-1 flex flex-col lg:flex-row items-center justify-between gap-8 my-4 w-full max-w-7xl mx-auto min-h-[580px]">
+  <!-- Main Workspace: Camera on Top (Mobile) / Left (Desktop) + Generous Desk Canvas -->
+  <main class="relative flex-1 flex flex-col lg:flex-row items-center justify-between gap-4 my-3 w-full max-w-7xl mx-auto">
     
-    <!-- Camera Chassis Structure -->
-    <div class="flex flex-col items-center justify-center p-3 z-20">
+    <!-- Camera Section -->
+    <div class="flex flex-col items-center justify-center p-1 z-20 shrink-0">
       <div class="camera-ground-wrapper">
         <div class="camera-ground-shadow"></div>
 
@@ -932,15 +860,15 @@
         </div>
       </div>
 
-      <div class="mt-4 text-center">
-        <span class="inline-block bg-white/80 backdrop-blur-sm text-slate-700 text-[11px] font-bold px-3 py-1 rounded-full border border-slate-300 shadow-sm">
-          📸 Press shutter button on camera to snap & print
+      <div class="mt-1 text-center">
+        <span class="inline-block bg-white/80 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-slate-300 shadow-sm">
+          📸 Tap pink lens shutter to snap & print
         </span>
       </div>
     </div>
 
-    <!-- Draggable Pinboard Desk -->
-    <div id="pinboardContainer" class="relative flex-1 w-full h-[520px] rounded-3xl border-2 border-dashed border-slate-400/60 bg-slate-200/50 backdrop-blur-[2px] overflow-hidden">
+    <!-- Draggable Pinboard Desk: Height expanded for mobile touch play -->
+    <div id="pinboardContainer" class="relative flex-1 w-full min-h-[72vh] md:min-h-[580px] rounded-3xl border-2 border-dashed border-slate-400/60 bg-slate-200/50 backdrop-blur-[2px]">
       <div id="emptyBoardMsg" class="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-500 font-caveat text-2xl pointer-events-none">
         <span>No polaroids on your desk yet!</span>
         <span class="text-sm font-sans text-slate-400 mt-1">Snap a photo with the camera or click "+ SECRET NOTE".</span>
@@ -948,7 +876,7 @@
     </div>
   </main>
 
-  <footer class="w-full flex flex-col sm:flex-row items-center justify-between gap-3 z-30 pt-2">
+  <footer class="w-full flex flex-col sm:flex-row items-center justify-between gap-2.5 z-30 pt-1">
     <button id="openGalleryBtn" class="flex items-center gap-2 bg-[#b89e83] hover:bg-[#a68c72] text-[#3e2c1e] font-bold px-4 py-2 rounded-xl text-xs md:text-sm tracking-wide shadow-md border border-[#9b8166] transition active:scale-95">
       <span>📌</span> VIEW PUBLIC PINBOARD GALLERY (<span id="archiveCount">0</span>)
     </button>
@@ -965,19 +893,19 @@
 
   <!-- Digital Library Modal -->
   <div id="galleryModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 gallery-modal-backdrop">
-    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 max-h-[85vh] flex flex-col shadow-2xl border-2 border-slate-800">
-      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-5 max-h-[85vh] flex flex-col shadow-2xl border-2 border-slate-800">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
         <div>
           <h2 class="text-xl font-bold text-slate-800">Polaroid Digital Library</h2>
-          <p class="text-xs text-slate-500">Edit, download, export to Instagram Story, or remove cards permanently.</p>
+          <p class="text-xs text-slate-500">Live global pinboard & local snapshots.</p>
         </div>
         <button id="closeGalleryBtn" class="text-slate-500 hover:text-slate-800 font-black text-2xl px-2">✕</button>
       </div>
 
-      <div id="modalGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-y-auto py-5 pr-2 flex-1"></div>
+      <div id="modalGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 overflow-y-auto py-4 pr-1 flex-1"></div>
 
       <div class="pt-3 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500">
-        <span>Click any card to export as high-res Polaroid PNG</span>
+        <span>Click any card to export as high-res PNG</span>
         <button id="closeModalBottomBtn" class="bg-slate-900 text-white font-bold px-4 py-2 rounded-xl hover:bg-slate-800">Close</button>
       </div>
     </div>
@@ -985,7 +913,7 @@
 
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg transition-opacity duration-300 pointer-events-none z-50 opacity-0"></div>
 
-<script>
+  <script>
     const STORAGE_KEY = 'polapop_library_v1';
     const THEME_KEY = 'polapop_camera_theme_v1';
 
@@ -999,7 +927,6 @@
     let audioCtx = null;
     let flashMode = 'on';
 
-    // Firebase Configuration
     const EMBEDDED_FIREBASE_CONFIG = {
       apiKey: "AIzaSyBcNNAy6BJakLzyw9Yi5_lDUkocMZRV1nc",
       authDomain: "polapop-54ef6.firebaseapp.com",
@@ -1019,7 +946,7 @@
         db = firebase.firestore();
       }
     } catch (err) {
-      console.warn("Firebase initialization skipped or failed:", err);
+      console.warn("Firebase initialization skipped:", err);
     }
 
     const themeSelect = document.getElementById('themeSelect');
@@ -1051,7 +978,7 @@
     const toast = document.getElementById('toast');
 
     const THEME_DECORATIONS = {
-      kiss: `<svg class="theme-deco-blossom" viewBox="0 0 100 100" style="position:absolute;top:4px;right:6px;width:34px;height:34px;pointer-events:none;"><path d="M20,40 Q40,10 60,40 Q80,20 90,50 Q60,80 40,60 Q10,70 20,40 Z" fill="#f43f5e" opacity="0.85"/></svg>`,
+      kiss: `<svg class="theme-deco-blossom" viewBox="0 0 100 100" style="position:absolute;top:4px;right:6px;width:30px;height:30px;pointer-events:none;"><path d="M20,40 Q40,10 60,40 Q80,20 90,50 Q60,80 40,60 Q10,70 20,40 Z" fill="#f43f5e" opacity="0.85"/></svg>`,
       ribbon: `
         <svg class="theme-deco-blossom" viewBox="0 0 140 140">
           <defs>
@@ -1078,7 +1005,7 @@
           </g>
         </svg>
         <div class="theme-deco-ribbon-bar">
-          <span style="font-size:11px; font-weight:700; color:#831843; font-family:'Playwrite US Trad', cursive; letter-spacing:0.5px;">With love</span>
+          <span style="font-size:10px; font-weight:700; color:#831843; font-family:'Playwrite US Trad', cursive;">With love</span>
         </div>
       `,
       crimson: `
@@ -1101,12 +1028,12 @@
       `,
       heart: `
         <svg class="theme-deco-heart" viewBox="0 0 40 40">
-          <path d="M20,34 C18,32 6,24 6,14 C6,8 10,4 16,4 C19,4 20,7 20,7 C20,7 21,4 24,4 C30,4 34,8 34,14 C34,24 22,32 20,34 Z" fill="#e11d48" stroke="#9f1239" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M20,34 C18,32 6,24 6,14 C6,8 10,4 16,4 C19,4 20,7 20,7 C20,7 21,4 24,4 C30,4 34,8 34,14 C34,24 22,32 20,34 Z" fill="#e11d48" stroke="#9f1239" stroke-width="1.5"/>
         </svg>
       `,
       star: `
         <svg class="theme-deco-star" viewBox="0 0 40 40">
-          <polygon points="20,2 25,14 38,15 28,24 31,37 20,30 9,37 12,24 2,15 15,14" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.8" stroke-linejoin="round"/>
+          <polygon points="20,2 25,14 38,15 28,24 31,37 20,30 9,37 12,24 2,15 15,14" fill="#3b82f6" stroke="#1d4ed8" stroke-width="1.8"/>
         </svg>
       `,
       classic: ``
@@ -1129,8 +1056,8 @@
         caption: 'SECRET MESSAGE',
         secretNote: 'meet me after sunset behind the cinema 🍿✨',
         date: getFormattedDate(),
-        x: 20,
-        y: 30,
+        x: 18,
+        y: 24,
         rot: -4,
         isFlipped: false
       },
@@ -1144,8 +1071,8 @@
         caption: 'MAY I MEET YOU',
         secretNote: 'Always wearing our shades indoors 😎',
         date: getFormattedDate(),
-        x: 80,
-        y: 120,
+        x: 65,
+        y: 190,
         rot: 3,
         isFlipped: false
       }
@@ -1218,7 +1145,7 @@
     function applyTheme(theme) {
       currentTheme = theme;
       localStorage.setItem(THEME_KEY, theme);
-      document.body.className = `flex flex-col justify-between p-2 md:p-6 min-h-screen theme-${theme}`;
+      document.body.className = `flex flex-col justify-between p-3 md:p-6 min-h-screen theme-${theme}`;
       cameraColorSelect.value = theme;
       showToast(`Camera theme: ${theme.toUpperCase()}`);
     }
@@ -1360,14 +1287,13 @@
       let isDragging = false;
       let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
 
-      // Ensure proper positioning
       element.style.touchAction = 'none';
 
       function onPointerDown(e) {
         if (e.target.closest('.editable-text') || e.target.closest('button') || e.target.closest('.pinboard-pill-badge')) return;
         
         isDragging = true;
-        element.setPointerCapture(e.pointerId);
+        try { element.setPointerCapture(e.pointerId); } catch(err) {}
 
         highestZ += 2;
         element.style.zIndex = highestZ;
@@ -1392,10 +1318,9 @@
 
         const boardWidth = pinboardContainer.clientWidth;
         const boardHeight = pinboardContainer.clientHeight;
-        const cardWidth = element.offsetWidth || 190;
-        const cardHeight = element.offsetHeight || 260;
+        const cardWidth = element.offsetWidth || 155;
+        const cardHeight = element.offsetHeight || 220;
 
-        // Fluid mobile boundary checks with generous overflow tolerance
         let newX = Math.max(-10, Math.min(initialLeft + deltaX, boardWidth - cardWidth + 10));
         let newY = Math.max(-10, Math.min(initialTop + deltaY, boardHeight - cardHeight + 10));
 
@@ -1413,7 +1338,6 @@
         element.removeEventListener('pointerup', onPointerUp);
         element.removeEventListener('pointercancel', onPointerUp);
 
-        // Permanently persist coordinates so resize/reload does not reset position
         item.x = Math.round(parseFloat(element.style.left));
         item.y = Math.round(parseFloat(element.style.top));
         saveData();
@@ -1422,7 +1346,6 @@
       element.addEventListener('pointerdown', onPointerDown);
     }
 
-    // Push card to Firebase Firestore Public Wall
     async function togglePublicPin(item, badgeBtn) {
       if (!db) {
         showToast('Connect cloud database to publish globally');
@@ -1459,14 +1382,13 @@
       const existingCards = pinboardContainer.querySelectorAll('.polaroid-card');
       existingCards.forEach(c => c.remove());
 
-      const boardW = pinboardContainer.clientWidth || 360;
-      const boardH = pinboardContainer.clientHeight || 500;
+      const boardW = pinboardContainer.clientWidth || 340;
+      const boardH = pinboardContainer.clientHeight || 560;
 
       polaroids.forEach((item, index) => {
-        // Keep user saved positions, only default if brand new
-        const posX = item.x !== undefined ? item.x : Math.max(10, (20 + (index * 25)) % (boardW - 180));
-        const posY = item.y !== undefined ? item.y : Math.max(10, (30 + (index * 30)) % (boardH - 240));
-        const rot = item.rot !== undefined ? item.rot : (index % 2 === 0 ? -4 : 6);
+        const posX = item.x !== undefined ? item.x : Math.max(12, (20 + (index * 24)) % (boardW - 160));
+        const posY = item.y !== undefined ? item.y : Math.max(16, (30 + (index * 42)) % (boardH - 230));
+        const rot = item.rot !== undefined ? item.rot : (index % 2 === 0 ? -4 : 5);
         const cardTheme = item.theme || 'classic';
         const cardFont = item.font || 'font-caveat';
         const cardTextColor = item.fontColor || '#1e293b';
@@ -1499,15 +1421,15 @@
                     <button class="delete-card-btn text-rose-400 p-0.5" title="Delete">✕</button>
                   </div>
                 </div>
-                <div class="secret-box-outline w-full aspect-square flex flex-col items-center justify-center p-3 cursor-pointer group">
-                  <span class="caption-text ${cardFont} font-bold text-lg md:text-xl text-center" style="color: ${cardTextColor};">
+                <div class="secret-box-outline w-full aspect-square flex flex-col items-center justify-center p-2.5 cursor-pointer group">
+                  <span class="caption-text ${cardFont} font-bold text-base md:text-lg text-center" style="color: ${cardTextColor};">
                     ${item.caption}
                   </span>
-                  <span class="text-[10px] text-amber-700 font-semibold mt-1 bg-amber-100/90 px-2 py-0.5 rounded-full">
+                  <span class="text-[9px] text-amber-700 font-semibold mt-1 bg-amber-100/90 px-1.5 py-0.5 rounded-full">
                     TAP TO FLIP 🔄
                   </span>
                 </div>
-                <div class="date-text font-mono text-[10px] text-center editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
+                <div class="date-text font-mono text-[9px] text-center editable-text outline-none mt-1" style="color: ${cardTextColor};" contenteditable="true">
                   ${item.date}
                 </div>
               </div>
@@ -1516,7 +1438,7 @@
                   <span class="text-[10px] font-bold text-amber-700 uppercase">🔒 Secret Message</span>
                   <button class="flip-card-btn text-slate-500 text-xs px-1 font-bold">✕ Back</button>
                 </div>
-                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto border border-amber-200" contenteditable="true">
+                <div class="secret-text-input ${cardFont} font-bold text-sm leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto border border-amber-200" contenteditable="true">
                   ${item.secretNote || 'Write something private here...'}
                 </div>
                 <div class="text-[9px] text-slate-400 text-center">Auto-saved to desk</div>
@@ -1542,10 +1464,10 @@
                 <div class="polaroid-img-wrapper cursor-pointer">
                   <img src="${item.url}" alt="Snapshot" loading="lazy" />
                 </div>
-                <div class="caption-text ${cardFont} font-bold text-center text-lg mt-2 editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
+                <div class="caption-text ${cardFont} font-bold text-center text-base mt-1.5 editable-text outline-none leading-tight" style="color: ${cardTextColor};" contenteditable="true">
                   ${item.caption}
                 </div>
-                <div class="date-text font-mono text-[10px] text-center mt-1 editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
+                <div class="date-text font-mono text-[9px] text-center mt-1 editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
                   ${item.date}
                 </div>
               </div>
@@ -1554,7 +1476,7 @@
                   <span class="text-[10px] font-bold text-amber-700 uppercase">🔒 Photo Note</span>
                   <button class="flip-card-btn text-slate-500 text-xs px-1 font-bold">✕ Back</button>
                 </div>
-                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto border border-amber-200" contenteditable="true">
+                <div class="secret-text-input ${cardFont} font-bold text-sm leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto border border-amber-200" contenteditable="true">
                   ${item.secretNote || 'No secret note yet. Click to write one...'}
                 </div>
                 <div class="text-[9px] text-slate-400 text-center">Flipped Polaroid Back</div>
@@ -1709,7 +1631,13 @@
       }
 
       const imageUrl = hiddenCanvas.toDataURL('image/jpeg', 0.90);
-      const randomRot = (Math.random() * 12 - 6).toFixed(1);
+      const randomRot = (Math.random() * 10 - 5).toFixed(1);
+
+      // Generous spread across expanded mobile board
+      const bW = pinboardContainer.clientWidth || 340;
+      const bH = pinboardContainer.clientHeight || 560;
+      const spawnX = Math.floor(Math.random() * Math.max(20, bW - 170)) + 10;
+      const spawnY = Math.floor(Math.random() * Math.max(30, bH - 240)) + 15;
 
       const newPolaroid = {
         id: `snap-${Date.now()}`,
@@ -1721,8 +1649,8 @@
         caption: 'MAY I MEET YOU',
         secretNote: 'A memorable snapshot in time.',
         date: getFormattedDate(),
-        x: Math.floor(Math.random() * 60) + 20,
-        y: Math.floor(Math.random() * 60) + 30,
+        x: spawnX,
+        y: spawnY,
         rot: parseFloat(randomRot),
         isFlipped: false,
         isPublicPinned: false
@@ -1738,7 +1666,12 @@
     shutterBtn.addEventListener('click', takeSnapshot);
 
     addSecretCardBtn.addEventListener('click', () => {
-      const randomRot = (Math.random() * 12 - 6).toFixed(1);
+      const randomRot = (Math.random() * 10 - 5).toFixed(1);
+      const bW = pinboardContainer.clientWidth || 340;
+      const bH = pinboardContainer.clientHeight || 560;
+      const spawnX = Math.floor(Math.random() * Math.max(20, bW - 170)) + 10;
+      const spawnY = Math.floor(Math.random() * Math.max(30, bH - 240)) + 15;
+
       const newSecretCard = {
         id: `secret-${Date.now()}`,
         type: 'secret-card',
@@ -1748,8 +1681,8 @@
         caption: 'SECRET MESSAGE',
         secretNote: 'meet me after sunset behind the cinema 🍿✨',
         date: getFormattedDate(),
-        x: Math.floor(Math.random() * 60) + 20,
-        y: Math.floor(Math.random() * 60) + 30,
+        x: spawnX,
+        y: spawnY,
         rot: parseFloat(randomRot),
         isFlipped: false,
         isPublicPinned: false
@@ -1762,7 +1695,6 @@
       showToast('Secret card added!');
     });
 
-    // Public Gallery Modal Loader
     async function renderGalleryModal() {
       modalGrid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-caveat text-xl">Loading shared community pins...</div>';
       
