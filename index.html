@@ -5,6 +5,7 @@
 <title>Polapop - Retro Digicam & Public Pinboard</title>
 <meta name="title" content="Polapop - Retro Digicam & Public Pinboard" />
 <meta name="description" content="Snap retro polaroids, flip to write secret notes, and pin memories to the global desk gallery." />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />  
 
 <!-- WhatsApp & Open Graph / Facebook -->
 <meta property="og:type" content="website" />
@@ -767,6 +768,25 @@
       backdrop-filter: blur(6px);
       background: rgba(15, 23, 42, 0.65);
     }
+    /* Ensure the desk allows comfortable touch movement and panning on phones */
+#desk {
+  touch-action: none; /* Prevents whole-page bouncing during card dragging */
+  min-height: 80vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure polaroid cards handle touches smoothly */
+.polaroid-card {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+
+.polaroid-card:active {
+  cursor: grabbing;
+}
   </style>
 </head>
 
@@ -965,9 +985,9 @@
 
   <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-full shadow-lg transition-opacity duration-300 pointer-events-none z-50 opacity-0"></div>
 
-  <script>
-    const STORAGE_KEY = 'instax_polaroid_library_v6';
-    const THEME_KEY = 'instax_camera_theme_v6';
+<script>
+    const STORAGE_KEY = 'polapop_library_v1';
+    const THEME_KEY = 'polapop_camera_theme_v1';
 
     let polaroids = [];
     let currentTheme = localStorage.getItem(THEME_KEY) || 'cream';
@@ -978,14 +998,29 @@
     let highestZ = 10;
     let audioCtx = null;
     let flashMode = 'on';
+
+    // Firebase Configuration
     const EMBEDDED_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBcNNAy6BJakLzyw9Yi5_lDUkocMZRV1nc",
-  authDomain: "polapop-54ef6.firebaseapp.com",
-  projectId: "polapop-54ef6",
-  storageBucket: "polapop-54ef6.firebasestorage.app",
-  messagingSenderId: "266598108482",
-  appId: "1:266598108482:web:d1d9db839c8d31dadd8cdb"
-};
+      apiKey: "AIzaSyBcNNAy6BJakLzyw9Yi5_lDUkocMZRV1nc",
+      authDomain: "polapop-54ef6.firebaseapp.com",
+      projectId: "polapop-54ef6",
+      storageBucket: "polapop-54ef6.firebasestorage.app",
+      messagingSenderId: "266598108482",
+      appId: "1:266598108482:web:d1d9db839c8d31dadd8cdb"
+    };
+
+    let db = null;
+    try {
+      if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+        firebase.initializeApp(EMBEDDED_FIREBASE_CONFIG);
+        firebase.auth().signInAnonymously().catch(console.error);
+        db = firebase.firestore();
+      } else if (typeof firebase !== 'undefined') {
+        db = firebase.firestore();
+      }
+    } catch (err) {
+      console.warn("Firebase initialization skipped or failed:", err);
+    }
 
     const themeSelect = document.getElementById('themeSelect');
     const fontSelect = document.getElementById('fontSelect');
@@ -1015,11 +1050,8 @@
     const addSecretCardBtn = document.getElementById('addSecretCardBtn');
     const toast = document.getElementById('toast');
 
-    // Vector SVG Decorations
     const THEME_DECORATIONS = {
-      kiss: `
-        <a href="https://www.flaticon.com/free-icons/kiss" title="kiss icons">Kiss icon</a>
-      `,
+      kiss: `<svg class="theme-deco-blossom" viewBox="0 0 100 100" style="position:absolute;top:4px;right:6px;width:34px;height:34px;pointer-events:none;"><path d="M20,40 Q40,10 60,40 Q80,20 90,50 Q60,80 40,60 Q10,70 20,40 Z" fill="#f43f5e" opacity="0.85"/></svg>`,
       ribbon: `
         <svg class="theme-deco-blossom" viewBox="0 0 140 140">
           <defs>
@@ -1048,24 +1080,6 @@
         <div class="theme-deco-ribbon-bar">
           <span style="font-size:11px; font-weight:700; color:#831843; font-family:'Playwrite US Trad', cursive; letter-spacing:0.5px;">With love</span>
         </div>
-        <svg class="theme-deco-satin-bow" viewBox="0 0 160 140" fill="none">
-          <defs>
-            <linearGradient id="bowGradLeft" x1="0%" y1="0%" x2="100%" y2="80%">
-              <stop offset="0%" stop-color="#ffe4e6"/><stop offset="70%" stop-color="#f472b6"/><stop offset="100%" stop-color="#db2777"/>
-            </linearGradient>
-            <linearGradient id="bowGradRight" x1="100%" y1="0%" x2="0%" y2="80%">
-              <stop offset="0%" stop-color="#ffe4e6"/><stop offset="70%" stop-color="#f472b6"/><stop offset="100%" stop-color="#db2777"/>
-            </linearGradient>
-            <linearGradient id="knotGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stop-color="#fdf2f8"/><stop offset="60%" stop-color="#f472b6"/><stop offset="100%" stop-color="#be185d"/>
-            </linearGradient>
-          </defs>
-          <path d="M 72,50 C 70,75 58,110 52,130 C 58,126 68,122 74,124 C 80,105 84,75 80,50 Z" fill="url(#bowGradLeft)"/>
-          <path d="M 88,50 C 90,75 102,110 108,130 C 102,126 92,122 86,124 C 80,105 76,75 80,50 Z" fill="url(#bowGradRight)"/>
-          <path d="M 74,40 C 45,15 10,20 12,48 C 14,68 45,70 72,48 Z" fill="url(#bowGradLeft)"/>
-          <path d="M 86,40 C 115,15 150,20 148,48 C 146,68 115,70 88,48 Z" fill="url(#bowGradRight)"/>
-          <rect x="68" y="32" width="24" height="26" rx="9" fill="url(#knotGrad)"/>
-        </svg>
       `,
       crimson: `
         <svg class="theme-deco-tulips" viewBox="0 0 100 130">
@@ -1115,9 +1129,9 @@
         caption: 'SECRET MESSAGE',
         secretNote: 'meet me after sunset behind the cinema 🍿✨',
         date: getFormattedDate(),
-        x: 35,
-        y: 40,
-        rot: -6,
+        x: 20,
+        y: 30,
+        rot: -4,
         isFlipped: false
       },
       {
@@ -1130,24 +1144,9 @@
         caption: 'MAY I MEET YOU',
         secretNote: 'Always wearing our shades indoors 😎',
         date: getFormattedDate(),
-        x: 215,
-        y: 50,
+        x: 80,
+        y: 120,
         rot: 3,
-        isFlipped: false
-      },
-      {
-        id: 'cat-sample-2',
-        type: 'photo',
-        theme: 'crimson',
-        font: 'font-playwrite',
-        fontColor: '#ffe4e6',
-        url: 'https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=500&auto=format&fit=crop&q=80',
-        caption: 'With Love',
-        secretNote: 'Popcorn and retro cinema nights 🎬',
-        date: getFormattedDate(),
-        x: 390,
-        y: 65,
-        rot: 7,
         isFlipped: false
       }
     ];
@@ -1219,7 +1218,7 @@
     function applyTheme(theme) {
       currentTheme = theme;
       localStorage.setItem(THEME_KEY, theme);
-      document.body.className = `flex flex-col justify-between p-4 md:p-7 min-h-screen theme-${theme}`;
+      document.body.className = `flex flex-col justify-between p-2 md:p-6 min-h-screen theme-${theme}`;
       cameraColorSelect.value = theme;
       showToast(`Camera theme: ${theme.toUpperCase()}`);
     }
@@ -1357,213 +1356,116 @@
       }
     }
 
-    function generatePolaroidCanvas(item, callback) {
-      const exportCanvas = document.createElement('canvas');
-      const W = 600;
-      const H = 730;
-      exportCanvas.width = W;
-      exportCanvas.height = H;
-      const ctx = exportCanvas.getContext('2d');
-      const theme = item.theme || 'classic';
+    function setupDraggable(element, item) {
+      let isDragging = false;
+      let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
 
-      ctx.fillStyle = theme === 'crimson' ? '#4a0d18' : (theme === 'ribbon' ? '#fff8f9' : (theme === 'kiss' ? '#faf7f5' : '#ffffff'));
-      ctx.fillRect(0, 0, W, H);
-      ctx.strokeStyle = theme === 'crimson' ? '#781528' : '#e2e8f0';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(1, 1, W - 2, H - 2);
+      // Ensure proper positioning
+      element.style.touchAction = 'none';
 
-      const photoX = 35;
-      const photoY = 35;
-      const photoSize = 530;
+      function onPointerDown(e) {
+        if (e.target.closest('.editable-text') || e.target.closest('button') || e.target.closest('.pinboard-pill-badge')) return;
+        
+        isDragging = true;
+        element.setPointerCapture(e.pointerId);
 
-      let chosenFont = 'bold 36px "Caveat", cursive';
-      if (item.font === 'font-playwrite') chosenFont = '28px "Playwrite US Trad", cursive';
-      else if (item.font === 'font-mono') chosenFont = 'bold 24px "Space Mono", monospace';
-      else if (item.font === 'font-fredoka') chosenFont = 'bold 28px "Fredoka", sans-serif';
+        highestZ += 2;
+        element.style.zIndex = highestZ;
 
-      function drawDecorations() {
-        if (theme === 'kiss') {
-          ctx.save();
-          const kx = W - 90, ky = H - 65;
-          ctx.fillStyle = '#dc2626';
-          ctx.beginPath();
-          ctx.ellipse(kx, ky, 28, 12, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        } else if (theme === 'heart') {
-          ctx.fillStyle = '#e11d48';
-          ctx.font = '36px sans-serif';
-          ctx.fillText('❤️', W - 75, H - 45);
-        } else if (theme === 'star') {
-          ctx.fillStyle = '#2563eb';
-          ctx.font = '36px sans-serif';
-          ctx.fillText('⭐', 50, H - 45);
-        }
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = parseFloat(element.style.left) || 0;
+        initialTop = parseFloat(element.style.top) || 0;
+
+        element.classList.add('shadow-2xl', 'scale-[1.02]');
+        element.addEventListener('pointermove', onPointerMove);
+        element.addEventListener('pointerup', onPointerUp);
+        element.addEventListener('pointercancel', onPointerUp);
       }
 
-      if (item.type === 'secret-card') {
-        ctx.strokeStyle = theme === 'crimson' ? '#fda4af' : '#94a3b8';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([8, 6]);
-        ctx.strokeRect(photoX + 20, photoY + 30, photoSize - 40, photoSize - 60);
-        ctx.setLineDash([]);
-        ctx.fillStyle = item.fontColor || '#1e293b';
-        ctx.font = chosenFont;
-        ctx.textAlign = 'center';
-        ctx.fillText(item.caption || 'SECRET MESSAGE', W / 2, 220);
-        ctx.fillStyle = theme === 'crimson' ? '#fbcfe8' : '#475569';
-        ctx.font = '26px "Caveat", cursive';
-        ctx.fillText(item.secretNote || '(No secret message written)', W / 2, 320);
-        ctx.fillStyle = item.fontColor || '#64748b';
-        ctx.font = '22px "Space Mono", monospace';
-        ctx.fillText(item.date || getFormattedDate(), W / 2, 665);
-        drawDecorations();
-        callback(exportCanvas.toDataURL('image/png'));
-      } else {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          ctx.drawImage(img, photoX, photoY, photoSize, photoSize);
-          ctx.fillStyle = item.fontColor || '#1e293b';
-          ctx.font = chosenFont;
-          ctx.textAlign = 'center';
-          ctx.fillText(item.caption || 'MAY I MEET YOU', W / 2, 620);
-          ctx.fillStyle = item.fontColor || '#64748b';
-          ctx.font = '20px "Space Mono", monospace';
-          ctx.fillText(item.date || getFormattedDate(), W / 2, 665);
-          drawDecorations();
-          callback(exportCanvas.toDataURL('image/png'));
-        };
-        img.onerror = () => {
-          ctx.fillStyle = '#1e293b';
-          ctx.fillRect(photoX, photoY, photoSize, photoSize);
-          drawDecorations();
-          callback(exportCanvas.toDataURL('image/png'));
-        };
-        img.src = item.url;
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        e.preventDefault();
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        const boardWidth = pinboardContainer.clientWidth;
+        const boardHeight = pinboardContainer.clientHeight;
+        const cardWidth = element.offsetWidth || 190;
+        const cardHeight = element.offsetHeight || 260;
+
+        // Fluid mobile boundary checks with generous overflow tolerance
+        let newX = Math.max(-10, Math.min(initialLeft + deltaX, boardWidth - cardWidth + 10));
+        let newY = Math.max(-10, Math.min(initialTop + deltaY, boardHeight - cardHeight + 10));
+
+        element.style.left = `${newX}px`;
+        element.style.top = `${newY}px`;
       }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        try { element.releasePointerCapture(e.pointerId); } catch(err) {}
+
+        element.classList.remove('shadow-2xl', 'scale-[1.02]');
+        element.removeEventListener('pointermove', onPointerMove);
+        element.removeEventListener('pointerup', onPointerUp);
+        element.removeEventListener('pointercancel', onPointerUp);
+
+        // Permanently persist coordinates so resize/reload does not reset position
+        item.x = Math.round(parseFloat(element.style.left));
+        item.y = Math.round(parseFloat(element.style.top));
+        saveData();
+      }
+
+      element.addEventListener('pointerdown', onPointerDown);
     }
 
-    function generateInstagramStoryCanvas(item, callback) {
-      generatePolaroidCanvas(item, (polaroidPngUrl) => {
-        const storyCanvas = document.createElement('canvas');
-        const SW = 1080, SH = 1920;
-        storyCanvas.width = SW;
-        storyCanvas.height = SH;
-        const sCtx = storyCanvas.getContext('2d');
-        const theme = item.theme || 'classic';
+    // Push card to Firebase Firestore Public Wall
+    async function togglePublicPin(item, badgeBtn) {
+      if (!db) {
+        showToast('Connect cloud database to publish globally');
+        return;
+      }
 
-        const grad = sCtx.createLinearGradient(0, 0, SW, SH);
-        if (theme === 'crimson') {
-          grad.addColorStop(0, '#2d060c');
-          grad.addColorStop(0.5, '#4a0d18');
-          grad.addColorStop(1, '#1f0307');
-        } else {
-          grad.addColorStop(0, '#fff1f2');
-          grad.addColorStop(0.5, '#fce7f3');
-          grad.addColorStop(1, '#fbcfe8');
-        }
-        sCtx.fillStyle = grad;
-        sCtx.fillRect(0, 0, SW, SH);
-
-        sCtx.fillStyle = theme === 'crimson' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(100, 116, 139, 0.12)';
-        for (let x = 18; x < SW; x += 36) {
-          for (let y = 18; y < SH; y += 36) {
-            sCtx.beginPath();
-            sCtx.arc(x, y, 1.8, 0, Math.PI * 2);
-            sCtx.fill();
-          }
-        }
-
-        sCtx.fillStyle = theme === 'crimson' ? '#ffe4e6' : '#1e293b';
-        sCtx.font = 'bold 36px "Fredoka", sans-serif';
-        sCtx.textAlign = 'center';
-        sCtx.fillText('★ MY INSTAX MEMORY ★', SW / 2, 200);
-
-        const polImg = new Image();
-        polImg.onload = () => {
-          sCtx.save();
-          sCtx.translate(SW / 2, SH / 2 + 10);
-          sCtx.rotate(-0.035);
-          sCtx.shadowColor = 'rgba(15, 23, 42, 0.28)';
-          sCtx.shadowBlur = 48;
-          sCtx.shadowOffsetY = 24;
-
-          const pW = 760;
-          const pH = (730 / 600) * pW;
-          sCtx.drawImage(polImg, -pW / 2, -pH / 2, pW, pH);
-
-          sCtx.shadowColor = 'transparent';
-          sCtx.fillStyle = 'rgba(244, 114, 182, 0.45)';
-          sCtx.fillRect(-110, -pH / 2 - 22, 220, 44);
-          sCtx.restore();
-
-          sCtx.fillStyle = theme === 'crimson' ? '#fecdd3' : '#475569';
-          sCtx.font = 'bold 36px "Caveat", cursive';
-          sCtx.textAlign = 'center';
-          sCtx.fillText("USE ONCE TO CAPTURE YOUR DAY THROUGH EVERYONE'S EYES →", SW / 2, SH - 140);
-
-          callback(storyCanvas.toDataURL('image/png'));
-        };
-        polImg.src = polaroidPngUrl;
-      });
-    }
-
-    async function exportToInstagramStory(item) {
-      showToast('Generating 9:16 Instagram Story image...');
-      generateInstagramStoryCanvas(item, async (storyPngUrl) => {
-        try {
-          const blob = await (await fetch(storyPngUrl)).blob();
-          const file = new File([blob], `instax-story-${Date.now().toString().slice(-4)}.png`, { type: 'image/png' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: 'Instax Story', text: 'Captured on Instax Mini SE Digicam ★' });
-            showToast('Shared to Instagram Story!');
-            return;
-          }
-        } catch (err) {
-          if (err.name === 'AbortError') return;
-        }
-
-        const a = document.createElement('a');
-        a.href = storyPngUrl;
-        a.download = `story-${(item.caption || 'snap').toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-4)}.png`;
-        a.click();
-        showToast('📱 9:16 Story PNG saved! Ready to post.');
-      });
-    }
-
-    function downloadSinglePolaroid(id) {
-      const item = polaroids.find(p => p.id === id);
-      if (!item) return;
-      generatePolaroidCanvas(item, (pngUrl) => {
-        const a = document.createElement('a');
-        a.href = pngUrl;
-        a.download = `polaroid-${(item.caption || 'snap').toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-4)}.png`;
-        a.click();
-        showToast('Polaroid card downloaded!');
-      });
-    }
-
-    function deletePolaroid(id) {
-      polaroids = polaroids.filter(p => p.id !== id);
-      if (activeCardId === id) activeCardId = null;
+      item.isPublicPinned = !item.isPublicPinned;
       saveData();
       renderBoard();
-      renderGalleryModal();
-      showToast('Card removed from desk');
+
+      if (item.isPublicPinned) {
+        try {
+          showToast('Publishing to Global Pinboard...');
+          await db.collection('public_pinboard').doc(item.id).set({
+            ...item,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          showToast('🌍 Live on Global Public Wall!');
+        } catch (err) {
+          console.error(err);
+          showToast('Sync error. Try again.');
+        }
+      } else {
+        try {
+          await db.collection('public_pinboard').doc(item.id).delete();
+          showToast('Removed from Public Wall');
+        } catch (err) {
+          console.error(err);
+        }
+      }
     }
 
     function renderBoard() {
       const existingCards = pinboardContainer.querySelectorAll('.polaroid-card');
       existingCards.forEach(c => c.remove());
 
-      const boardRect = pinboardContainer.getBoundingClientRect();
-      const maxX = Math.max(20, (boardRect.width || 600) - 200);
-      const maxY = Math.max(20, (boardRect.height || 500) - 240);
+      const boardW = pinboardContainer.clientWidth || 360;
+      const boardH = pinboardContainer.clientHeight || 500;
 
       polaroids.forEach((item, index) => {
-        const posX = Math.min(Math.max(10, item.x !== undefined ? item.x : (25 + index * 40)), maxX);
-        const posY = Math.min(Math.max(10, item.y !== undefined ? item.y : (30 + index * 30)), maxY);
+        // Keep user saved positions, only default if brand new
+        const posX = item.x !== undefined ? item.x : Math.max(10, (20 + (index * 25)) % (boardW - 180));
+        const posY = item.y !== undefined ? item.y : Math.max(10, (30 + (index * 30)) % (boardH - 240));
         const rot = item.rot !== undefined ? item.rot : (index % 2 === 0 ? -4 : 6);
         const cardTheme = item.theme || 'classic';
         const cardFont = item.font || 'font-caveat';
@@ -1587,63 +1489,37 @@
             <button class="pinboard-pill-badge ${isPinned}" title="Pin to Public Pinboard">
               ${pinBadgeText}
             </button>
-            <div class="flip-back-prompt flip-card-btn" title="Click to flip to back message">
-              <div class="circular-flip-disc">
-                <svg class="w-3.5 h-3.5 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                  <path d="M3 3v5h5"/>
-                </svg>
-              </div>
-              <svg class="doodle-loop-arrow" viewBox="0 0 46 24" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M 3,12 C 9,20 18,22 22,14 C 25,7 20,3 15,6 C 10,10 14,18 30,15 L 40,14" />
-                <path d="M 34,10 L 41,14 L 35,18" />
-              </svg>
-              <span class="doodle-flip-text">FLIP BACK TO WRITE YOUR MESSAGE</span>
-            </div>
             <div class="flip-inner h-full">
               <div class="flip-front flex flex-col justify-between h-full">
                 <div class="flex items-center justify-between pb-1 text-slate-400">
                   <span class="drag-handle text-[10px] tracking-wider text-slate-400 uppercase font-sans font-bold cursor-grab">⋮⋮ DRAG</span>
                   <div class="flex items-center gap-1">
-                    <button class="cycle-theme-btn text-pink-600 hover:text-pink-800 p-0.5 rounded transition" title="Change Theme Frame">🎨</button>
-                    <button class="cycle-color-btn text-amber-600 hover:text-amber-800 p-0.5 rounded transition" title="Change Text Color">🖍️</button>
-                    <button class="story-card-btn text-rose-500 hover:text-rose-700 p-0.5 rounded transition" title="Export for Instagram Story (9:16)">
-                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                    </button>
-                    <button class="flip-card-btn text-amber-600 hover:text-amber-800 p-0.5 rounded transition" title="Flip to Read/Write Secret Message">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    </button>
-                    <button class="download-card-btn text-slate-500 hover:text-slate-900 p-0.5 rounded transition" title="Download Card">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    </button>
-                    <button class="delete-card-btn text-rose-400 hover:text-rose-600 p-0.5 rounded transition" title="Delete">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
+                    <button class="cycle-theme-btn text-pink-600 p-0.5" title="Change Theme">🎨</button>
+                    <button class="flip-card-btn text-amber-600 p-0.5" title="Flip to Secret Note">🔄</button>
+                    <button class="delete-card-btn text-rose-400 p-0.5" title="Delete">✕</button>
                   </div>
                 </div>
-                <div class="secret-box-outline w-full aspect-square flex flex-col items-center justify-center p-3 cursor-pointer group" title="Click or flip to reveal hidden note">
-                  <span class="caption-text ${cardFont} font-bold text-lg md:text-xl tracking-wider text-center group-hover:scale-105 transition-transform" style="color: ${cardTextColor};">
+                <div class="secret-box-outline w-full aspect-square flex flex-col items-center justify-center p-3 cursor-pointer group">
+                  <span class="caption-text ${cardFont} font-bold text-lg md:text-xl text-center" style="color: ${cardTextColor};">
                     ${item.caption}
                   </span>
-                  <span class="text-[10px] text-amber-700 font-sans font-semibold mt-1 bg-amber-100/90 px-2 py-0.5 rounded-full">
+                  <span class="text-[10px] text-amber-700 font-semibold mt-1 bg-amber-100/90 px-2 py-0.5 rounded-full">
                     TAP TO FLIP 🔄
                   </span>
                 </div>
-                <div class="mt-4">
-                  <div class="date-text font-mono text-[10px] text-center editable-text outline-none px-1 rounded hover:bg-slate-100/50 transition cursor-text" style="color: ${cardTextColor};" contenteditable="true" spellcheck="false" title="Click to edit date">
-                    ${item.date}
-                  </div>
+                <div class="date-text font-mono text-[10px] text-center editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
+                  ${item.date}
                 </div>
               </div>
               <div class="flip-back p-1 text-left flex flex-col justify-between">
                 <div class="flex items-center justify-between pb-1 border-b border-slate-200">
-                  <span class="text-[10px] font-sans font-bold text-amber-700 uppercase">🔒 Secret Message</span>
-                  <button class="flip-card-btn text-slate-500 hover:text-slate-800 text-xs px-1 font-bold" title="Flip Back">✕ Back</button>
+                  <span class="text-[10px] font-bold text-amber-700 uppercase">🔒 Secret Message</span>
+                  <button class="flip-card-btn text-slate-500 text-xs px-1 font-bold">✕ Back</button>
                 </div>
-                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto my-1 border border-amber-200" contenteditable="true" spellcheck="false" placeholder="Type your secret message here...">
+                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto border border-amber-200" contenteditable="true">
                   ${item.secretNote || 'Write something private here...'}
                 </div>
-                <div class="text-[9px] text-slate-400 text-center font-sans">Auto-saved to desk</div>
+                <div class="text-[9px] text-slate-400 text-center">Auto-saved to desk</div>
               </div>
             </div>
           `;
@@ -1653,59 +1529,35 @@
             <button class="pinboard-pill-badge ${isPinned}" title="Pin to Public Pinboard">
               ${pinBadgeText}
             </button>
-            <div class="flip-back-prompt flip-card-btn" title="Click to flip to back message">
-              <div class="circular-flip-disc">
-                <svg class="w-3.5 h-3.5 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-                  <path d="M3 3v5h5"/>
-                </svg>
-              </div>
-              <svg class="doodle-loop-arrow" viewBox="0 0 46 24" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M 3,12 C 9,20 18,22 22,14 C 25,7 20,3 15,6 C 10,10 14,18 30,15 L 40,14" />
-                <path d="M 34,10 L 41,14 L 35,18" />
-              </svg>
-              <span class="doodle-flip-text">FLIP BACK TO WRITE YOUR MESSAGE</span>
-            </div>
             <div class="flip-inner h-full">
               <div class="flip-front">
                 <div class="flex items-center justify-between pb-1 text-slate-400">
                   <span class="drag-handle text-[10px] tracking-wider uppercase font-sans font-bold cursor-grab">⋮⋮ DRAG</span>
                   <div class="flex items-center gap-1">
-                    <button class="cycle-theme-btn text-pink-600 hover:text-pink-800 p-0.5 rounded transition" title="Change Theme Frame">🎨</button>
-                    <button class="cycle-color-btn text-amber-600 hover:text-amber-800 p-0.5 rounded transition" title="Change Text Color">🖍️</button>
-                    <button class="story-card-btn text-rose-500 hover:text-rose-700 p-0.5 rounded transition" title="Export for Instagram Story (9:16)">
-                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-                    </button>
-                    <button class="flip-card-btn text-slate-500 hover:text-amber-600 p-0.5 rounded transition" title="Flip to Secret Back Note">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    </button>
-                    <button class="download-card-btn text-slate-500 hover:text-slate-900 p-0.5 rounded transition" title="Download Polaroid">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                    </button>
-                    <button class="delete-card-btn text-rose-400 hover:text-rose-600 p-0.5 rounded transition" title="Delete">
-                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
+                    <button class="cycle-theme-btn text-pink-600 p-0.5" title="Change Theme">🎨</button>
+                    <button class="flip-card-btn text-slate-500 p-0.5" title="Flip to Secret Back Note">🔄</button>
+                    <button class="delete-card-btn text-rose-400 p-0.5" title="Delete">✕</button>
                   </div>
                 </div>
-                <div class="polaroid-img-wrapper">
+                <div class="polaroid-img-wrapper cursor-pointer">
                   <img src="${item.url}" alt="Snapshot" loading="lazy" />
                 </div>
-                <div class="caption-text ${cardFont} font-bold text-center text-lg mt-2 leading-tight tracking-wide editable-text outline-none px-1 rounded hover:bg-slate-100/50 transition cursor-text" style="color: ${cardTextColor};" contenteditable="true" spellcheck="false" title="Click to customize caption">
+                <div class="caption-text ${cardFont} font-bold text-center text-lg mt-2 editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
                   ${item.caption}
                 </div>
-                <div class="date-text font-mono text-[10px] text-center mt-1 tracking-wider editable-text outline-none px-1 rounded hover:bg-slate-100/50 transition cursor-text" style="color: ${cardTextColor};" contenteditable="true" spellcheck="false" title="Click to edit date">
+                <div class="date-text font-mono text-[10px] text-center mt-1 editable-text outline-none" style="color: ${cardTextColor};" contenteditable="true">
                   ${item.date}
                 </div>
               </div>
               <div class="flip-back p-1 text-left flex flex-col justify-between">
                 <div class="flex items-center justify-between pb-1 border-b border-slate-200">
-                  <span class="text-[10px] font-sans font-bold text-amber-700 uppercase">🔒 Photo Note</span>
-                  <button class="flip-card-btn text-slate-500 hover:text-slate-800 text-xs px-1 font-bold" title="Flip Back">✕ Back</button>
+                  <span class="text-[10px] font-bold text-amber-700 uppercase">🔒 Photo Note</span>
+                  <button class="flip-card-btn text-slate-500 text-xs px-1 font-bold">✕ Back</button>
                 </div>
-                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto my-1 border border-amber-200" contenteditable="true" spellcheck="false" placeholder="Write a secret note on the back of this photo...">
+                <div class="secret-text-input ${cardFont} font-bold text-base leading-snug p-2 bg-amber-50/70 rounded flex-1 editable-text outline-none cursor-text overflow-y-auto border border-amber-200" contenteditable="true">
                   ${item.secretNote || 'No secret note yet. Click to write one...'}
                 </div>
-                <div class="text-[9px] text-slate-400 text-center font-sans">Flipped Polaroid Back</div>
+                <div class="text-[9px] text-slate-400 text-center">Flipped Polaroid Back</div>
               </div>
             </div>
           `;
@@ -1713,54 +1565,24 @@
 
         const captionElem = card.querySelector('.caption-text');
         const dateElem = card.querySelector('.date-text');
-        const dlBtn = card.querySelector('.download-card-btn');
         const delBtn = card.querySelector('.delete-card-btn');
         const flipBtns = card.querySelectorAll('.flip-card-btn');
         const secretInput = card.querySelector('.secret-text-input');
-        const secretBoxOutline = card.querySelector('.secret-box-outline');
         const themeBtn = card.querySelector('.cycle-theme-btn');
-        const colorBtn = card.querySelector('.cycle-color-btn');
-        const storyBtn = card.querySelector('.story-card-btn');
         const pinBadgeBtn = card.querySelector('.pinboard-pill-badge');
         const photoWrapper = card.querySelector('.polaroid-img-wrapper');
+        const secretBoxOutline = card.querySelector('.secret-box-outline');
 
         card.addEventListener('pointerdown', () => {
           activeCardId = item.id;
           document.querySelectorAll('.polaroid-card').forEach(c => c.classList.remove('active-selected'));
           card.classList.add('active-selected');
-          if (item.fontColor) {
-            fontColorDot.style.backgroundColor = item.fontColor;
-            customColorInput.value = item.fontColor;
-          }
         });
-
-        if (storyBtn) {
-          storyBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            exportToInstagramStory(item);
-          });
-        }
-
-        if (colorBtn) {
-          colorBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            activeCardId = item.id;
-            const colorPalette = ['#1e293b', '#f472b6', '#e11d48', '#78350f', '#16a34a', '#2563eb', '#9333ea', '#ea580c', '#ffffff'];
-            const curIdx = colorPalette.indexOf(item.fontColor || '#1e293b');
-            item.fontColor = colorPalette[(curIdx + 1) % colorPalette.length];
-            applyActiveColor(item.fontColor);
-            saveData();
-            showToast('Text color changed!');
-          });
-        }
 
         if (pinBadgeBtn) {
           pinBadgeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            item.isPublicPinned = !item.isPublicPinned;
-            saveData();
-            renderBoard();
-            showToast(item.isPublicPinned ? '📌 Added to Public Pinboard!' : 'Removed from Public Pinboard');
+            togglePublicPin(item, pinBadgeBtn);
           });
         }
 
@@ -1772,6 +1594,34 @@
             saveData();
           });
         }
+
+        if (secretBoxOutline) {
+          secretBoxOutline.addEventListener('click', () => {
+            item.isFlipped = true;
+            card.classList.add('flipped');
+            saveData();
+          });
+        }
+
+        if (themeBtn) {
+          themeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const themeKeys = ['classic', 'kiss', 'ribbon', 'crimson', 'heart', 'star'];
+            const curIdx = themeKeys.indexOf(item.theme || 'classic');
+            item.theme = themeKeys[(curIdx + 1) % themeKeys.length];
+            saveData();
+            renderBoard();
+          });
+        }
+
+        flipBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            item.isFlipped = !item.isFlipped;
+            card.classList.toggle('flipped', item.isFlipped);
+            saveData();
+          });
+        });
 
         if (captionElem) {
           captionElem.addEventListener('blur', () => {
@@ -1794,136 +1644,20 @@
           });
         }
 
-        if (themeBtn) {
-          themeBtn.addEventListener('click', (e) => {
+        if (delBtn) {
+          delBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            activeCardId = item.id;
-            const themeKeys = ['classic', 'kiss', 'ribbon', 'crimson', 'heart', 'star'];
-            const curIdx = themeKeys.indexOf(item.theme || 'classic');
-            item.theme = themeKeys[(curIdx + 1) % themeKeys.length];
+            polaroids = polaroids.filter(p => p.id !== item.id);
             saveData();
             renderBoard();
-            showToast(`Theme: ${item.theme}`);
           });
         }
-
-        flipBtns.forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            item.isFlipped = !item.isFlipped;
-            card.classList.toggle('flipped', item.isFlipped);
-            saveData();
-          });
-        });
-
-        if (secretBoxOutline) {
-          secretBoxOutline.addEventListener('click', () => {
-            item.isFlipped = true;
-            card.classList.add('flipped');
-            saveData();
-          });
-        }
-
-        dlBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          downloadSinglePolaroid(item.id);
-        });
-
-        delBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          deletePolaroid(item.id);
-        });
 
         setupDraggable(card, item);
         pinboardContainer.appendChild(card);
       });
 
       updateCounter();
-    }
-
-    function setupDraggable(element, item) {
-      let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
-
-      function onPointerDown(e) {
-        if (e.target.closest('.editable-text') || e.target.closest('button')) return;
-        isDragging = true;
-        highestZ++;
-        element.style.zIndex = highestZ;
-
-        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
-        startX = clientX;
-        startY = clientY;
-        initialLeft = parseFloat(element.style.left) || 0;
-        initialTop = parseFloat(element.style.top) || 0;
-
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-      }
-
-      function onPointerMove(e) {
-        if (!isDragging) return;
-        if (e.cancelable) e.preventDefault();
-        const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0].clientY);
-        const deltaX = clientX - startX;
-        const deltaY = clientY - startY;
-        const boardRect = pinboardContainer.getBoundingClientRect();
-        const cardRect = element.getBoundingClientRect();
-
-        let newX = Math.max(0, Math.min(initialLeft + deltaX, boardRect.width - cardRect.width));
-        let newY = Math.max(0, Math.min(initialTop + deltaY, boardRect.height - cardRect.height));
-        element.style.left = `${newX}px`;
-        element.style.top = `${newY}px`;
-      }
-
-      function onPointerUp() {
-        if (!isDragging) return;
-        isDragging = false;
-        item.x = parseFloat(element.style.left);
-        item.y = parseFloat(element.style.top);
-        saveData();
-        window.removeEventListener('pointermove', onPointerMove);
-        window.removeEventListener('pointerup', onPointerUp);
-      }
-
-      element.addEventListener('pointerdown', onPointerDown);
-    }
-
-    function applyNightFlashExposure(ctx, size) {
-      try {
-        const imgData = ctx.getImageData(0, 0, size, size);
-        const data = imgData.data;
-        let totalLum = 0;
-        const step = 8;
-        let sampled = 0;
-        for (let i = 0; i < data.length; i += 4 * step) {
-          totalLum += (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-          sampled++;
-        }
-        const avgLum = sampled > 0 ? totalLum / sampled : 128;
-        const boostFactor = avgLum < 80 ? 1.75 : (avgLum < 120 ? 1.45 : 1.15);
-        const gamma = avgLum < 80 ? 0.8 : 0.9;
-
-        for (let i = 0; i < data.length; i += 4) {
-          let r = Math.pow(data[i] / 255, gamma) * 255 * boostFactor;
-          let g = Math.pow(data[i + 1] / 255, gamma) * 255 * boostFactor;
-          let b = Math.pow(data[i + 2] / 255, gamma) * 255 * boostFactor;
-          data[i] = Math.min(255, r * 1.05);
-          data[i + 1] = Math.min(255, g * 1.01);
-          data[i + 2] = Math.min(255, b * 0.96);
-        }
-        ctx.putImageData(imgData, 0, 0);
-      } catch (e) {}
-
-      const flashGrad = ctx.createRadialGradient(size * 0.5, size * 0.44, size * 0.05, size * 0.5, size * 0.5, size * 0.72);
-      flashGrad.addColorStop(0, 'rgba(255, 255, 255, 0.32)');
-      flashGrad.addColorStop(0.35, 'rgba(255, 248, 235, 0.12)');
-      flashGrad.addColorStop(0.75, 'rgba(25, 20, 15, 0.08)');
-      flashGrad.addColorStop(1, 'rgba(10, 8, 15, 0.45)');
-      ctx.fillStyle = flashGrad;
-      ctx.fillRect(0, 0, size, size);
     }
 
     async function takeSnapshot() {
@@ -1967,13 +1701,6 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       if (isFlashActive) {
-        applyNightFlashExposure(ctx, cropSize);
-      } else {
-        ctx.fillStyle = 'rgba(255, 235, 210, 0.04)';
-        ctx.fillRect(0, 0, cropSize, cropSize);
-      }
-
-      if (isFlashActive) {
         setTimeout(async () => {
           flashScreen.style.opacity = '0';
           flashIlluminator.style.opacity = '0';
@@ -1981,11 +1708,8 @@
         }, 120);
       }
 
-      const imageUrl = hiddenCanvas.toDataURL('image/jpeg', 0.92);
-      const boardRect = pinboardContainer.getBoundingClientRect();
-      const randomX = Math.floor(Math.random() * Math.max(20, (boardRect.width || 600) - 220)) + 20;
-      const randomY = Math.floor(Math.random() * Math.max(20, (boardRect.height || 500) - 250)) + 20;
-      const randomRot = (Math.random() * 14 - 7).toFixed(1);
+      const imageUrl = hiddenCanvas.toDataURL('image/jpeg', 0.90);
+      const randomRot = (Math.random() * 12 - 6).toFixed(1);
 
       const newPolaroid = {
         id: `snap-${Date.now()}`,
@@ -1997,27 +1721,24 @@
         caption: 'MAY I MEET YOU',
         secretNote: 'A memorable snapshot in time.',
         date: getFormattedDate(),
-        x: Math.max(10, randomX),
-        y: Math.max(10, randomY),
+        x: Math.floor(Math.random() * 60) + 20,
+        y: Math.floor(Math.random() * 60) + 30,
         rot: parseFloat(randomRot),
-        isFlipped: false
+        isFlipped: false,
+        isPublicPinned: false
       };
 
       polaroids.unshift(newPolaroid);
       activeCardId = newPolaroid.id;
       saveData();
       renderBoard();
-      showToast(isFlashActive ? '⚡ Night Flash fired! Clear photo captured.' : '📷 Photo snapped!');
+      showToast('📷 Photo snapped!');
     }
 
     shutterBtn.addEventListener('click', takeSnapshot);
 
     addSecretCardBtn.addEventListener('click', () => {
-      const boardRect = pinboardContainer.getBoundingClientRect();
-      const randomX = Math.floor(Math.random() * Math.max(20, (boardRect.width || 600) - 220)) + 20;
-      const randomY = Math.floor(Math.random() * Math.max(20, (boardRect.height || 500) - 250)) + 20;
-      const randomRot = (Math.random() * 14 - 7).toFixed(1);
-
+      const randomRot = (Math.random() * 12 - 6).toFixed(1);
       const newSecretCard = {
         id: `secret-${Date.now()}`,
         type: 'secret-card',
@@ -2027,75 +1748,56 @@
         caption: 'SECRET MESSAGE',
         secretNote: 'meet me after sunset behind the cinema 🍿✨',
         date: getFormattedDate(),
-        x: Math.max(10, randomX),
-        y: Math.max(10, randomY),
+        x: Math.floor(Math.random() * 60) + 20,
+        y: Math.floor(Math.random() * 60) + 30,
         rot: parseFloat(randomRot),
-        isFlipped: false
+        isFlipped: false,
+        isPublicPinned: false
       };
 
       polaroids.unshift(newSecretCard);
       activeCardId = newSecretCard.id;
       saveData();
       renderBoard();
-      showToast('Secret Message Card placed on desk!');
+      showToast('Secret card added!');
     });
 
-    function renderGalleryModal() {
+    // Public Gallery Modal Loader
+    async function renderGalleryModal() {
+      modalGrid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 font-caveat text-xl">Loading shared community pins...</div>';
+      
+      let itemsToDisplay = [...polaroids];
+
+      if (db) {
+        try {
+          const snapshot = await db.collection('public_pinboard').limit(30).get();
+          if (!snapshot.empty) {
+            const cloudItems = [];
+            snapshot.forEach(doc => cloudItems.push(doc.data()));
+            itemsToDisplay = cloudItems;
+          }
+        } catch (err) {
+          console.warn("Could not fetch remote pins, loading local:", err);
+        }
+      }
+
       modalGrid.innerHTML = '';
-      if (polaroids.length === 0) {
-        modalGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-caveat text-xl">No memories stored in the archive yet.</div>`;
+      if (itemsToDisplay.length === 0) {
+        modalGrid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-caveat text-xl">No public memories pinned yet. Be the first!</div>`;
         return;
       }
 
-      polaroids.forEach(item => {
+      itemsToDisplay.forEach(item => {
         const itemCard = document.createElement('div');
-        itemCard.className = 'group relative bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex flex-col items-center shadow-sm hover:shadow-md transition';
-
-        if (item.type === 'secret-card') {
-          itemCard.innerHTML = `
-            <div class="w-full aspect-square rounded-lg border-2 border-dashed border-amber-300 bg-amber-50/50 mb-2 cursor-pointer flex flex-col items-center justify-center p-2 text-center group-hover:scale-105 transition duration-200">
-              <span class="text-xl">✉</span>
-              <span class="font-caveat font-bold text-amber-900 text-xs mt-1">SECRET NOTE</span>
-            </div>
-            <span class="font-caveat font-bold text-slate-800 text-sm truncate max-w-full text-center">${item.caption}</span>
-            <span class="font-mono text-[9px] text-slate-400 text-center">${item.date}</span>
-            <div class="flex gap-2 mt-2 w-full">
-              <button class="modal-dl flex-1 bg-amber-800 text-white rounded-lg py-1 text-[10px] font-bold hover:bg-amber-900 transition">Save</button>
-              <button class="modal-story bg-pink-100 text-pink-700 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-pink-200 transition" title="Export as 9:16 Instagram Story">📱 Story</button>
-              <button class="modal-del bg-rose-100 text-rose-600 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-rose-200 transition">✕</button>
-            </div>
-          `;
-        } else {
-          itemCard.innerHTML = `
-            <div class="w-full aspect-square rounded-lg overflow-hidden bg-slate-900 mb-2 cursor-pointer">
-              <img src="${item.url}" alt="${item.caption}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-            </div>
-            <span class="font-caveat font-bold text-slate-800 text-sm truncate max-w-full text-center">${item.caption}</span>
-            <span class="font-mono text-[9px] text-slate-400 text-center">${item.date}</span>
-            <div class="flex gap-2 mt-2 w-full">
-              <button class="modal-dl flex-1 bg-slate-900 text-white rounded-lg py-1 text-[10px] font-bold hover:bg-slate-700 transition">Save</button>
-              <button class="modal-story bg-pink-100 text-pink-700 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-pink-200 transition" title="Export as 9:16 Instagram Story">📱 Story</button>
-              <button class="modal-del bg-rose-100 text-rose-600 rounded-lg px-2 py-1 text-[10px] font-bold hover:bg-rose-200 transition">✕</button>
-            </div>
-          `;
-        }
-
-        itemCard.onclick = (e) => {
-          if (!e.target.closest('button')) downloadSinglePolaroid(item.id);
-        };
-        itemCard.querySelector('.modal-dl').onclick = (e) => {
-          e.stopPropagation();
-          downloadSinglePolaroid(item.id);
-        };
-        itemCard.querySelector('.modal-story').onclick = (e) => {
-          e.stopPropagation();
-          exportToInstagramStory(item);
-        };
-        itemCard.querySelector('.modal-del').onclick = (e) => {
-          e.stopPropagation();
-          deletePolaroid(item.id);
-        };
-
+        itemCard.className = 'group relative bg-white border border-slate-200 rounded-xl p-2.5 flex flex-col items-center shadow-sm';
+        itemCard.innerHTML = `
+          <div class="w-full aspect-square rounded-lg overflow-hidden bg-slate-100 mb-2">
+            ${item.url ? `<img src="${item.url}" class="w-full h-full object-cover" />` : `<div class="flex items-center justify-center h-full text-2xl">💌</div>`}
+          </div>
+          <span class="font-caveat font-bold text-slate-800 text-sm truncate max-w-full text-center">${item.caption}</span>
+          <span class="text-[10px] text-pink-600 font-caveat text-center line-clamp-2">${item.secretNote || ''}</span>
+          <span class="font-mono text-[9px] text-slate-400 text-center mt-1">${item.date || ''}</span>
+        `;
         modalGrid.appendChild(itemCard);
       });
     }
@@ -2107,27 +1809,13 @@
 
     closeGalleryBtn.addEventListener('click', () => galleryModal.classList.add('hidden'));
     closeModalBottomBtn.addEventListener('click', () => galleryModal.classList.add('hidden'));
-    galleryModal.addEventListener('click', (e) => {
-      if (e.target === galleryModal) galleryModal.classList.add('hidden');
-    });
-
-    downloadAllBtn.addEventListener('click', () => {
-      if (polaroids.length === 0) {
-        showToast('No cards to download!');
-        return;
-      }
-      showToast('Exporting all polaroid cards in sequence...');
-      polaroids.forEach((item, idx) => {
-        setTimeout(() => downloadSinglePolaroid(item.id), idx * 450);
-      });
-    });
 
     resetBoardBtn.addEventListener('click', () => {
       polaroids = [...DEFAULT_PHOTOS];
       activeCardId = null;
       saveData();
       renderBoard();
-      showToast('Desk reset to initial layout');
+      showToast('Desk reset');
     });
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -2136,17 +1824,6 @@
       initWebcam();
       loadData();
     });
-
-    window.addEventListener('resize', () => {
-      renderBoard();
-    });
-    const PNG_STICKER_PRESETS = {
-  bow: "stickers/pink-bow.png",          // or a full URL like "https://i.imgur.com/xyz.png"
-  kiss: "stickers/lipstick-kiss.png",
-  flower: "stickers/cosmos-flower.png",
-  tulips: "stickers/white-tulips.png",
-  star: "stickers/blue-star.png"
-};
   </script>
 </body>
 </html>
